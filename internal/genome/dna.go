@@ -6,7 +6,15 @@ package genome
 import (
 	"math"
 	"math/rand"
+
+	"github.com/arsham/lify/internal/pool"
 )
+
+var dnaPool = pool.NewPool(func() *DNA {
+	return &DNA{
+		traits: make([]rune, 0, 60),
+	}
+})
 
 // A DNA is the DNA of an organism. It contains the genes of the organism,
 // which are the characteristics of the organism.
@@ -14,24 +22,19 @@ type DNA struct {
 	traits []rune
 }
 
-// NewDNA returns a new DNA object, preserving n empty traits. You should
-// always resolve the DNA object with calling the Resolve() method.
-func NewDNA(n int) *DNA {
-	return &DNA{
-		traits: make([]rune, n),
-	}
-}
-
 // NewDNAFromString returns a new DNA object, using the given string. You
 // should always resolve the DNA object with calling the Resolve() method.
 func NewDNAFromString(s string) *DNA {
-	return &DNA{
-		traits: []rune(s),
-	}
+	d := dnaPool.Get()
+	d.traits = append(d.traits, []rune(s)...)
+	return d
 }
 
 // Resolve resolves the DNA object.
-func (d *DNA) Resolve() {}
+func (d *DNA) Resolve() {
+	d.traits = d.traits[:0]
+	dnaPool.Put(d)
+}
 
 func (d *DNA) String() string {
 	return string(d.traits)
@@ -100,7 +103,7 @@ func (d *DNA) IsCompatibleWith(other *DNA) bool {
 // traits that have the least occurrence in the parents. The mutation rate is 1
 // per length of the traits, and randomly applied 3 out of 100 times.
 func CreateOffspring(p1, p2 *DNA) *DNA {
-	c := NewDNA(len(p1.traits))
+	c := NewDNAFromString(p1.String())
 	patterns := make(map[rune]int, len(p1.traits))
 	locations := make(map[rune][]int, len(p1.traits))
 	for i := 0; i < len(p1.traits); i++ {

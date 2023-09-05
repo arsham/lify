@@ -7,6 +7,7 @@ import (
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/arsham/lify/internal/genome"
+	"github.com/arsham/lify/internal/itesting"
 )
 
 func TestDNA(t *testing.T) {
@@ -20,7 +21,7 @@ func TestDNA(t *testing.T) {
 
 func testDNASetAndTraitAt(t *testing.T) {
 	t.Parallel()
-	dna := genome.NewDNA(24)
+	dna := genome.NewDNAFromString(itesting.RandomDNA(24))
 	dna.SetTrait(0, 'a')
 	dna.SetTrait(12, '6')
 
