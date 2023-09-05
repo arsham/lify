@@ -3,6 +3,7 @@ module github.com/arsham/lify
 go 1.21.0
 
 require (
+	github.com/alecthomas/assert/v2 v2.3.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/hajimehoshi/ebiten/v2 v2.5.9
 	github.com/kkyr/fig v0.3.2
@@ -10,8 +11,10 @@ require (
 )
 
 require (
+	github.com/alecthomas/repr v0.2.0 // indirect
 	github.com/ebitengine/purego v0.4.0 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b // indirect
+	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/jezek/xgb v1.1.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
