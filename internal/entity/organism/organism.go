@@ -17,6 +17,8 @@ var (
 	// ErrNotEnoughFood specifies that the Living object does not have enough
 	// food for certain action.
 	ErrNotEnoughFood = errors.New("not enough food")
+	// ErrMaxGrowth indicates that the Living object is already at max growth.
+	ErrMaxGrowth = errors.New("already at max growth")
 )
 
 var livingPool = pool.NewPool(func() *living {
@@ -73,11 +75,16 @@ func (l *living) Deteriorate(amount int32) {
 	l.health.current -= amount
 }
 
-// Grow increases the size by the given amount. This process increases the
-// hunger by the same amount.
-func (l *living) Grow(amount int32) error {
+// Grow increases the size by the amount that the DNA specifies. This process
+// increases the hunger by the same amount.
+func (l *living) Grow() error {
+	amount := genome.Growth(l.dna)
 	if l.fed.current < amount {
 		return ErrNotEnoughFood
+	}
+	m := genome.MaxGrowth(l.dna)
+	if l.size+amount > m {
+		return ErrMaxGrowth
 	}
 	l.size += amount
 	l.fed.current -= amount
