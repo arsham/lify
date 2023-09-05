@@ -1,6 +1,7 @@
 //go:build mage
 // +build mage
 
+// Package mage contains setup for magefiles.
 package main
 
 import (
@@ -17,14 +18,6 @@ import (
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
-
-// Aliases for some of the more used commands.
-var Aliases = map[string]interface{}{
-	"ut":    Test.Unit,
-	"wt":    Test.UnitWatch,
-	"l":     Lint,
-	"build": Build.All,
-}
 
 // Dependencies downloads/upgrades dependencies.
 func Dependencies() error {
