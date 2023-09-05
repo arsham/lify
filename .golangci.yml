@@ -1,0 +1,203 @@
+linters-settings:
+  funlen:
+    lines: 110
+    statements: 60
+  cyclop:
+    skip-tests: true
+    max-complexity: 30
+    package-average: 5
+  gocyclo:
+    min-complexity: 15
+  gofumpt:
+    lang-version: "1.18"
+  goimports:
+    local-prefixes: github.com/golangci/golangci-lint
+  goconst:
+    min-len: 2
+    min-occurrences: 3
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+  godot:
+    capital: true
+  gosimple:
+    go: "1.18"
+    checks: ["all"]
+  govet:
+    settings:
+      printf:
+        funcs:
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+    disable-all: true
+    enable:
+      - assign
+      - atomic
+      - atomicalign
+      - bools
+      - buildtag
+      - cgocall
+      - composites
+      - copylocks
+      - deepequalerrors
+      - errorsas
+      - fieldalignment
+      - findcall
+      - framepointer
+      - httpresponse
+      - ifaceassert
+      - loopclosure
+      - lostcancel
+      - nilfunc
+      - printf
+      - reflectvaluecompare
+      - shift
+      - sigchanyzer
+      - sortslice
+      - stdmethods
+      - stringintconv
+      - structtag
+      - testinggoroutine
+      - tests
+      - unmarshal
+      - unreachable
+      - unsafeptr
+      - unusedresult
+
+  maligned:
+    suggest-new: true
+  misspell:
+    locale: UK
+    ignore-words:
+      - color
+      - colorful
+  staticcheck:
+    go: "1.18"
+    checks: ["all"]
+  stylecheck:
+    go: "1.18"
+    checks: ["all"]
+  unparam:
+    check-exported: true
+
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - bodyclose
+        - containedctx
+        - cyclop
+        - dupl # we usualy duplicate code in tests
+        - errcheck
+        - forcetypeassert
+        - funlen
+        - gocritic
+        - gosec
+        - govet
+        - maintidx
+        - unparam
+    - path: testing
+      linters:
+        - errcheck
+        - gosec
+    - path: mock.go
+      linters:
+        - unused
+    - path: commands.go
+      linters:
+        - funlen
+        - forbidigo
+    - linters:
+        - gosec
+      text: "G404:"
+    - linters:
+        - gosec
+      text: "G204:"
+  fix: true
+  exclude-use-default: false
+
+run:
+  go: "1.18"
+  timeout: 5m
+  skip-dirs:
+    - tmp
+    - bin
+    - scripts
+  allow-parallel-runners: true
+  tests: true
+  build-tags:
+    - integration
+    - mage
+
+linters:
+  enable:
+    - asciicheck
+    - asasalint
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - cyclop
+    - decorder
+    - dogsled
+    - dupl
+    - durationcheck
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - execinquery
+    - exportloopref
+    - forcetypeassert
+    - funlen
+    - gocheckcompilerdirectives
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - grouper
+    - importas
+    - ineffassign
+    - maintidx
+    - makezero
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnil
+    - noctx
+    - prealloc
+    - predeclared
+    - promlinter
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - stylecheck
+    - tenv
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - wastedassign
+    - whitespace

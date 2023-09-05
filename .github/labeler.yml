@@ -1,0 +1,11 @@
+game:
+  - internal/game/*
+  - internal/game/**/*
+
+config:
+  - internal/config/*
+  - internal/config/**/*
+
+ci:
+  - .github/*
+  - .github/**/*
