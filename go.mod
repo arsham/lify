@@ -1,6 +1,6 @@
 module github.com/arsham/lify
 
-go 1.21.0
+go 1.21.1
 
 require (
 	github.com/alecthomas/assert/v2 v2.3.0

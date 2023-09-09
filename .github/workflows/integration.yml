@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ["1.21"]
+        go: ["1.21.1"]
 
     steps:
       - name: Checkout repo
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ["1.21"]
+        go: ["1.21.1"]
 
     steps:
       - name: Checkout repo
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ["1.21"]
+        go: ["1.21.1"]
 
     steps:
       - name: Checkout repo
