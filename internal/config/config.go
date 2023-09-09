@@ -19,7 +19,9 @@ var (
 type Env struct {
 	LogLevel int `fig:"log_level" default:"8"`
 	UI       struct {
-		DPI int `default:"96"`
+		DPI    int `default:"96"`
+		Width  int `default:"1200"`
+		Height int `default:"800"`
 	}
 }
 

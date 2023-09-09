@@ -3,71 +3,162 @@
 package game
 
 import (
+	"context"
+	"fmt"
+	"image/color"
+	"time"
+
+	"github.com/disintegration/gift"
+	"github.com/oakmound/oak/v4"
+	"github.com/oakmound/oak/v4/dlog"
+	"github.com/oakmound/oak/v4/event"
+	"github.com/oakmound/oak/v4/key"
+	"github.com/oakmound/oak/v4/render"
+	"github.com/oakmound/oak/v4/render/mod"
+	"github.com/oakmound/oak/v4/scene"
+
 	"github.com/arsham/lify/internal/config"
-	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/arsham/lify/internal/ui"
 )
 
 // Game controls how the game plays out.
 type Game struct {
 	env *config.Env
+	ui  *ui.Board
 }
 
 // Start initialises the game, starts it and draws the UI.
 func Start(env *config.Env) error {
+	b := ui.NewBoard(env)
 	g := &Game{
 		env: env,
+		ui:  b,
 	}
-	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	ebiten.SetScreenClearedEveryFrame(false)
-	ebiten.SetWindowSize(1024, 800)
-	return ebiten.RunGame(g)
+
+	render.SetDrawStack(
+		render.NewCompositeR(),
+		render.NewDynamicHeap(),
+		render.NewStaticHeap(),
+	)
+
+	win := oak.NewWindow()
+	err := win.AddScene(sceneLify, g.startLifyScene(win))
+	if err != nil {
+		return fmt.Errorf("adding scene: %w", err)
+	}
+
+	err = win.AddScene(sceneLoading, g.loadingScene(win, b))
+	if err != nil {
+		return fmt.Errorf("adding scene: %w", err)
+	}
+
+	return win.Init(sceneLoading, func(c oak.Config) (oak.Config, error) {
+		c.FrameRate = 60
+		c.DrawFrameRate = 60
+		c.Screen = oak.Screen{
+			Width:  env.UI.Width,
+			Height: env.UI.Height,
+			Scale:  1,
+		}
+		c.Debug = oak.Debug{
+			Level: "Info",
+		}
+		c.Title = "Lify Simulator"
+		c.TrackInputChanges = true
+		c.LoadBuiltinCommands = true
+		c.TopMost = true
+		c.BatchLoad = false
+
+		return c, nil
+	})
 }
 
-// Update updates a game by one tick. The given argument represents a screen
-// image.
-//
-// You can assume that Update is always called TPS-times per second (60 by
-// default), and you can assume that the time delta between two Updates is
-// always 1 / TPS [s] (1/60[s] by default).
-//
-// An actual TPS is available by ActualTPS(), and the result might slightly
-// differ from your expected TPS, but still, your game logic should stick to
-// the fixed time delta and should not rely on ActualTPS() value. This API is
-// for just measurement and/or debugging. In the long run, the number of Update
-// calls should be adjusted based on the set TPS on average.
-//
-// In the first frame, it is ensured that Update is called at least once before
-// Draw. You can use Update to initialise the game state.
-//
-// If the error returned is nil, game execution proceeds normally. If the error
-// returned is Termination, game execution halts, but does not return an error
-// from RunGame. If the error returned is any other non-nil value, game
-// execution halts and the error is returned from RunGame.
-func (r *Game) Update() error {
-	return nil
+func (g *Game) startLifyScene(win *oak.Window) scene.Scene {
+	return scene.Scene{
+		Start: func(ctx *scene.Context) {
+			event.GlobalBind(ctx, key.Down(key.Q), func(key.Event) event.Response {
+				ctx.Window.Quit()
+				return 0
+			})
+			win.ParentContext = context.WithValue(context.Background(), preLoadTimeStr, time.Now())
+			screen := render.NewColorBoxM(win.Bounds().X(), win.Bounds().Y(), color.RGBA{0, 0, 0, 0})
+			mid := win.Bounds().DivConst(2)
+
+			herb, err := g.ui.Asset(ui.AssetHerb1)
+			if err != nil {
+				dlog.Error("Failed getting asset", err)
+				ctx.Window.Quit()
+				return
+			}
+			identM := herb.Modify(mod.ResizeToFit(64, 64, gift.CubicResampling))
+			identM.Draw(screen, float64(mid.X()), float64(mid.Y()))
+			_, err = render.Draw(screen)
+			if err != nil {
+				dlog.Error("Failed rendering text:", err)
+				ctx.Window.Quit()
+				return
+			}
+			win.SetLoadingRenderable(screen)
+		},
+		End: func() (string, *scene.Result) {
+			return sceneLify, nil
+		},
+	}
 }
 
-// Draw draws the game screen by one frame.
-//
-// The give argument represents a screen image. The updated content is adopted
-// as the game screen.
-//
-// The frequency of Draw calls depends on the user's environment, especially
-// the monitors refresh rate. For portability, you should not put your game
-// logic in Draw in general.
-func (r *Game) Draw(*ebiten.Image) {
-}
+func (g *Game) loadingScene(win *oak.Window, b *ui.Board) scene.Scene {
+	return scene.Scene{
+		Start: func(ctx *scene.Context) {
+			err := win.SetFullScreen(true)
+			if err != nil {
+				dlog.Error("Failed setting full screen failed:", err)
+			}
+			titleText := render.NewText("Loading assets...", 0, 0)
+			titleText.SetFont(g.ui.Font(ui.AssetFontInfo))
+			putCentre(ctx, titleText, axixXY)
+			_, err = render.Draw(titleText)
+			if err != nil {
+				dlog.Error("Failed rendering text:", err)
+				ctx.Window.Quit()
+				return
+			}
 
-// Layout accepts a native outside size in device-independent pixels and
-// returns the game's logical screen size.
-//
-// Even though the outside size and the screen size differ, the rendering scale
-// is automatically adjusted to fit with the outside.
-//
-// Layout is called almost every frame.
-//
-// You can return a fixed screen size if you don't care, or you can also return
-// a calculated screen size adjusted with the given outside size.
-func (r *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return outsideWidth, outsideHeight
+			event.GlobalBind(ctx, key.Down(key.Q), func(key.Event) event.Response {
+				ctx.Window.Quit()
+				return 0
+			})
+
+			go func() {
+				err := b.Load()
+				if err != nil {
+					dlog.Error("Failed loading assets:", err)
+					ctx.Window.Quit()
+					return
+				}
+
+				titleText.SetString("Assets have been loaded")
+				titleText.SetFont(g.ui.Font(ui.AssetFontInfo))
+				putCentre(ctx, titleText, axixXY)
+				bounds := ctx.Window.Bounds()
+				instructions := render.NewText("Press Enter to start, or press Q to quit", 0, float64(bounds.Y()*3/4))
+				instructions.SetFont(g.ui.Font(ui.AssetFontInfo))
+				putCentre(ctx, instructions, axixX)
+
+				_, err = render.Draw(instructions)
+				if err != nil {
+					dlog.Error("Failed rendering text:", err)
+					ctx.Window.Quit()
+					return
+				}
+
+				event.GlobalBind(ctx, key.AnyDown, func(key.Event) event.Response {
+					ctx.Window.NextScene()
+					return 0
+				})
+			}()
+		},
+		End: func() (string, *scene.Result) {
+			return sceneLify, nil
+		},
+	}
 }
