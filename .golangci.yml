@@ -120,6 +120,11 @@ issues:
     - linters:
         - gosec
       text: "G204:"
+    - path: build
+      linters:
+        - revive
+        - gocritic
+        - cyclop
   fix: true
   exclude-use-default: false
 

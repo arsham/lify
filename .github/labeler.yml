@@ -6,6 +6,10 @@ config:
   - internal/config/*
   - internal/config/**/*
 
+build:
+  - build/*
+  - build/**/*
+
 ci:
   - .github/*
   - .github/**/*
