@@ -19,6 +19,13 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
+// Aliases for some of the more used commands.
+var Aliases = map[string]interface{}{
+	"ut": Test.Unit,
+	"wt": Test.UnitWatch,
+	"l":  Lint,
+}
+
 // Dependencies downloads/upgrades dependencies.
 func Dependencies() error {
 	deps := []string{
@@ -114,7 +121,7 @@ func (Test) UnitWatch(ctx context.Context) error {
 // CI runs all tests, used for github actions.
 func (Test) CI() error {
 	mg.Deps(Tidy)
-	return sh.RunV("go", "test", "-trimpath", "-failfast", "-v", "-race", "./...")
+	return sh.RunV("go", "test", "-trimpath", "-failfast", "-race", "./...")
 }
 
 func watchChanges(ctx context.Context) (chan struct{}, error) {
