@@ -4,18 +4,19 @@ import (
 	"context"
 	"fmt"
 	"image/color"
+	"math/rand"
 	"time"
 
-	"github.com/disintegration/gift"
 	"github.com/oakmound/oak/v4"
 	"github.com/oakmound/oak/v4/dlog"
 	"github.com/oakmound/oak/v4/event"
 	"github.com/oakmound/oak/v4/key"
 	"github.com/oakmound/oak/v4/render"
-	"github.com/oakmound/oak/v4/render/mod"
 	"github.com/oakmound/oak/v4/scene"
+	"github.com/paulmach/orb"
 
 	"github.com/arsham/lify/internal/config"
+	"github.com/arsham/lify/internal/entity/food"
 )
 
 const (
@@ -62,11 +63,8 @@ func (s *Scene) Start() error {
 	return s.win.Init(sceneLoading, func(c oak.Config) (oak.Config, error) {
 		c.FrameRate = 60
 		c.DrawFrameRate = 60
-		c.Screen = oak.Screen{
-			Width:  s.env.UI.Width,
-			Height: s.env.UI.Height,
-			Scale:  1,
-		}
+		c.Screen.Width = s.env.UI.Width
+		c.Screen.Height = s.env.UI.Height
 		c.Debug = oak.Debug{
 			Level: "Info",
 		}
@@ -75,6 +73,7 @@ func (s *Scene) Start() error {
 		c.LoadBuiltinCommands = true
 		c.TopMost = true
 		c.BatchLoad = false
+		c.Fullscreen = true
 		return c, nil
 	})
 }
@@ -85,14 +84,10 @@ func (s *Scene) Start() error {
 func (s *Scene) loadingScene() scene.Scene {
 	return scene.Scene{
 		Start: func(ctx *scene.Context) {
-			err := s.win.SetFullScreen(true)
-			if err != nil {
-				dlog.Error("Failed setting full screen failed:", err)
-			}
 			titleText := render.NewText("Loading assets...", 0, 0)
 			titleText.SetFont(s.board.Font(AssetFontInfo))
 			putCentre(ctx, titleText, axixXY)
-			_, err = render.Draw(titleText)
+			_, err := render.Draw(titleText)
 			if err != nil {
 				dlog.Error("Failed rendering text:", err)
 				ctx.Window.Quit()
@@ -110,6 +105,25 @@ func (s *Scene) loadingScene() scene.Scene {
 					dlog.Error("Failed loading assets:", err)
 					ctx.Window.Quit()
 					return
+				}
+				asset, err := s.board.Asset(AssetHerb1)
+				if err != nil {
+					dlog.Error("getting herb asset:", err)
+					ctx.Window.Quit()
+					return
+				}
+
+				bBounds := s.board.Bound()
+				for i := 0; i < 10000; i++ {
+					point := orb.Point{
+						float64(rand.Int31n(int32(bBounds.Max.X()))),
+						float64(rand.Int31n(int32(bBounds.Max.Y()))),
+					}
+					herb := food.NewHerb(fmt.Sprintf("Herb #%d", i))
+					e := NewEntity(herb, point, asset)
+					if err := s.board.Add(e); err != nil {
+						dlog.Error("Failed adding at:", point)
+					}
 				}
 
 				titleText.SetString("Assets have been loaded")
@@ -148,17 +162,11 @@ func (s *Scene) startLifyScene() scene.Scene {
 			})
 			s.win.ParentContext = context.WithValue(context.Background(), preLoadTimeStr, time.Now())
 			screen := render.NewColorBoxM(s.win.Bounds().X(), s.win.Bounds().Y(), color.RGBA{0, 0, 0, 0})
-			mid := s.win.Bounds().DivConst(2)
 
-			herb, err := s.board.Asset(AssetHerb1)
-			if err != nil {
-				dlog.Error("Failed getting asset", err)
-				ctx.Window.Quit()
-				return
+			for _, e := range s.board.EntitiesIn(2000, 300, 2000+1920, 300+1080) {
+				e.Draw(screen, orb.Point{2000, 300})
 			}
-			identM := herb.Modify(mod.ResizeToFit(64, 64, gift.CubicResampling))
-			identM.Draw(screen, float64(mid.X()), float64(mid.Y()))
-			_, err = render.Draw(screen)
+			_, err := render.Draw(screen)
 			if err != nil {
 				dlog.Error("Failed rendering text:", err)
 				ctx.Window.Quit()
