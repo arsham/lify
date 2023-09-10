@@ -1,4 +1,4 @@
-package game
+package ui
 
 import (
 	"github.com/oakmound/oak/v4/render"
@@ -8,11 +8,6 @@ import (
 type gameContext string
 
 const preLoadTimeStr gameContext = "preloadtime"
-
-const (
-	sceneLoading = "loading_scene"
-	sceneLify    = "lify_scene"
-)
 
 // axis are the plural of axis.
 type axis uint8
