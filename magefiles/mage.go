@@ -21,9 +21,11 @@ import (
 
 // Aliases for some of the more used commands.
 var Aliases = map[string]interface{}{
-	"ut": Test.Unit,
-	"wt": Test.UnitWatch,
-	"l":  Lint,
+	"t:u":   Test.Unit,
+	"t:ua":  Test.UnitAll,
+	"t:uw":  Test.UnitWatch,
+	"t:uwa": Test.UnitWatchAll,
+	"l":     Lint,
 }
 
 // Dependencies downloads/upgrades dependencies.
@@ -97,19 +99,45 @@ type Test mg.Namespace
 
 // Unit runs the unit tests.
 func (Test) Unit() error {
+	_ = Tidy()
 	return sh.RunV("go", "test", "-trimpath", "-failfast", "-short", "./...")
 }
 
+// UnitAll runs the unit tests without running without skipping slow tests.
+func (Test) UnitAll() error {
+	_ = Tidy()
+	return sh.RunV("go", "test", "-trimpath", "-failfast", "./...")
+}
+
 // UnitWatch watches for file changes and runs the unit tests.
-func (Test) UnitWatch(ctx context.Context) error {
+func (t Test) UnitWatch(ctx context.Context) error {
 	ch, err := watchChanges(ctx)
 	if err != nil {
 		return err
 	}
-	_ = sh.RunV("go", "test", "-trimpath", "-failfast", "-short", "./...")
+	_ = t.Unit()
 	fmt.Println(strings.Repeat("#", 40))
 	for range ch {
-		err := sh.RunV("go", "test", "-trimpath", "-failfast", "-short", "./...")
+		err := t.Unit()
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(strings.Repeat("#", 40))
+	}
+	return nil
+}
+
+// UnitWatchAll watches for file changes and runs the unit tests without
+// skipping slow tests.
+func (t Test) UnitWatchAll(ctx context.Context) error {
+	ch, err := watchChanges(ctx)
+	if err != nil {
+		return err
+	}
+	_ = t.UnitAll()
+	fmt.Println(strings.Repeat("#", 40))
+	for range ch {
+		err := t.UnitAll()
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -136,10 +164,15 @@ func watchChanges(ctx context.Context) (chan struct{}, error) {
 		_ = watcher.Close()
 	}()
 
-	exts := []string{".go"}
+	err = watchFiles(watcher)
+	if err != nil {
+		return nil, err
+	}
 
 	go func() {
 		for {
+			// watching for new directories.
+			_ = watchFiles(watcher)
 			select {
 			case event, ok := <-watcher.Events:
 				if !ok {
@@ -150,7 +183,10 @@ func watchChanges(ctx context.Context) (chan struct{}, error) {
 					continue
 				}
 				if event.Op == fsnotify.Write {
-					ch <- struct{}{}
+					select {
+					case ch <- struct{}{}:
+					default:
+					}
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
@@ -161,12 +197,29 @@ func watchChanges(ctx context.Context) (chan struct{}, error) {
 		}
 	}()
 
-	err = watcher.Add(".")
-	if err != nil {
-		return nil, err
-	}
-
 	return ch, nil
+}
+
+var exts = []string{
+	".go",
+	".mod",
+}
+
+func watchFiles(watcher *fsnotify.Watcher) error {
+	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("walking directory: %w", err)
+		}
+		if !info.IsDir() {
+			return nil
+		}
+		err = watcher.Add(path)
+		if err != nil {
+			log.Println("error:", err)
+		}
+		return nil
+	})
+	return err
 }
 
 // Audit audits the code for updates, vulnerabilities and binary weight.
