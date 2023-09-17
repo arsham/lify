@@ -7,7 +7,6 @@ import (
 	"image"
 	_ "image/png"
 	"log/slog"
-	"math"
 	"os"
 	"path/filepath"
 	"time"
@@ -17,6 +16,7 @@ import (
 	"golang.org/x/image/colornames"
 
 	"github.com/arsham/lify/internal/config"
+	"github.com/arsham/lify/internal/ui/scenes"
 )
 
 //go:embed assets
@@ -52,54 +52,23 @@ func run(env *config.Env) {
 	sprite.Draw(win, pixel.IM)
 	sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
 
-	angel := 0.0
+	play := &scenes.Play{
+		Win:          win,
+		CamSpeed:     1000,
+		CamZoomSpeed: 1.2,
+		CamZoom:      1.0,
+		CamPos:       pixel.ZV,
+	}
 	last := time.Now()
-	camPos := pixel.ZV
-	camSpeed := 1000.0
-	camZoom := 1.0
-	camZoomSpeed := 1.2
-	var (
-		frames = 0
-		second = time.Tick(time.Second)
-	)
+	frames := 0
+	second := time.Tick(time.Second)
 
 	for !win.Closed() {
 		win.Clear(colornames.Whitesmoke)
 		dt := time.Since(last).Seconds()
 		last = time.Now()
-		angel += 3 * dt
 
-		mat := pixel.IM
-		mat = mat.Rotated(pixel.ZV, angel)
-		mat = mat.Moved(win.Bounds().Center())
-
-		if win.Pressed(pixelgl.KeyLeft) {
-			camPos.X -= camSpeed * dt
-		}
-		if win.Pressed(pixelgl.KeyRight) {
-			camPos.X += camSpeed * dt
-		}
-		if win.Pressed(pixelgl.KeyDown) {
-			camPos.Y -= camSpeed * dt
-		}
-		if win.Pressed(pixelgl.KeyUp) {
-			camPos.Y += camSpeed * dt
-		}
-
-		if win.Pressed(pixelgl.KeyUp) {
-			camPos.Y += camSpeed * dt
-		}
-		camZoom *= math.Pow(camZoomSpeed, win.MouseScroll().Y)
-
-		cam := pixel.IM.Scaled(camPos, camZoom).Moved(win.Bounds().Center().Sub(camPos))
-		win.SetMatrix(cam)
-
-		sprite.Draw(win, mat)
-
-		sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center().Add(pixel.Vec{X: 100, Y: 200})))
-		sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center().Add(pixel.Vec{X: -200, Y: -200})))
-		sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center().Add(pixel.Vec{X: -300, Y: -300})))
-		sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center().Add(pixel.Vec{X: -400, Y: -400})))
+		play.Draw(sprite, dt)
 
 		win.Update()
 
