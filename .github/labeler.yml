@@ -6,6 +6,10 @@ config:
   - internal/config/*
   - internal/config/**/*
 
+component:
+  - component/
+  - component/**/*
+
 build:
   - build/*
   - build/**/*
