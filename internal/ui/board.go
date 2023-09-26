@@ -9,7 +9,7 @@ import (
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/quadtree"
 
-	"github.com/arsham/lify/internal/config"
+	"github.com/arsham/neuragene/internal/config"
 )
 
 // Board contains the logic for interacting and rendering everything on the

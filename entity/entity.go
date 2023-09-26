@@ -4,7 +4,7 @@ package entity
 import (
 	"sync/atomic"
 
-	"github.com/arsham/lify/component"
+	"github.com/arsham/neuragene/component"
 )
 
 // Mask is used to determine if an entity supports a specific logic.

@@ -115,12 +115,12 @@ func buildWithPairs(pairs [][3]string) error {
 				}
 			}
 		}
-		buildName := fmt.Sprintf("lify_%s_%s%s", pair[0], pair[1], pair[2])
+		buildName := fmt.Sprintf("neuragene_%s_%s%s", pair[0], pair[1], pair[2])
 		toRun := []string{"build", "--tags", "prod", "-o", buildName}
 		if flags, ok := archPairFlags[pair]; ok {
 			toRun = append(toRun, flags...)
 		}
-		toRun = append(toRun, "github.com/arsham/lify")
+		toRun = append(toRun, "github.com/arsham/neuragene")
 		fmt.Println("Running: go ", toRun)
 		cmd := exec.Command("go", toRun...)
 		var out bytes.Buffer

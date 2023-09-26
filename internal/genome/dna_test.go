@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
-	"github.com/arsham/lify/internal/genome"
-	"github.com/arsham/lify/internal/itesting"
+	"github.com/arsham/neuragene/internal/genome"
+	"github.com/arsham/neuragene/internal/itesting"
 )
 
 func TestDNA(t *testing.T) {

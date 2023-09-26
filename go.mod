@@ -1,4 +1,4 @@
-module github.com/arsham/lify
+module github.com/arsham/neuragene
 
 go 1.21.1
 

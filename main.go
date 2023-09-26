@@ -15,8 +15,8 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 
-	"github.com/arsham/lify/internal/config"
-	"github.com/arsham/lify/internal/ui/scenes"
+	"github.com/arsham/neuragene/internal/config"
+	"github.com/arsham/neuragene/internal/ui/scenes"
 )
 
 //go:embed assets

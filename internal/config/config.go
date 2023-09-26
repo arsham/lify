@@ -29,7 +29,7 @@ type Env struct {
 func Config() (*Env, error) {
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "version" {
-		slog.Info("Starting lify", "version", version, "current_sha", currentSha)
+		slog.Info("Starting neuragene", "version", version, "current_sha", currentSha)
 		os.Exit(0)
 	}
 	var e Env

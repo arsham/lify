@@ -7,7 +7,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/arsham/lify/internal/pool"
+	"github.com/arsham/neuragene/internal/pool"
 )
 
 var dnaPool = pool.NewPool(func() *DNA {
