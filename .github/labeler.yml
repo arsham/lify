@@ -10,6 +10,10 @@ component:
   - component/
   - component/**/*
 
+entity:
+  - entity/
+  - entity/**/*
+
 build:
   - build/*
   - build/**/*

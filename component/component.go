@@ -8,7 +8,7 @@ import "github.com/faiface/pixel"
 // from all the maps.
 type Manager struct {
 	// Position holds the position, scale, and velocity of entities.
-	Position map[int64]*Position
+	Position map[uint64]*Position
 }
 
 // Component is used to identify a component.
