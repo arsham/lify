@@ -16,7 +16,6 @@ import (
 	"golang.org/x/image/colornames"
 
 	"github.com/arsham/neuragene/internal/config"
-	"github.com/arsham/neuragene/internal/ui/scenes"
 )
 
 //go:embed assets
@@ -52,23 +51,11 @@ func run(env *config.Env) {
 	sprite.Draw(win, pixel.IM)
 	sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
 
-	play := &scenes.Play{
-		Win:          win,
-		CamSpeed:     1000,
-		CamZoomSpeed: 1.2,
-		CamZoom:      1.0,
-		CamPos:       pixel.ZV,
-	}
-	last := time.Now()
 	frames := 0
 	second := time.Tick(time.Second)
 
 	for !win.Closed() {
 		win.Clear(colornames.Whitesmoke)
-		dt := time.Since(last).Seconds()
-		last = time.Now()
-
-		play.Draw(sprite, dt)
 
 		win.Update()
 

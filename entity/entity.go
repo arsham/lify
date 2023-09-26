@@ -79,3 +79,11 @@ func (m *Manager) MapByMask(mask Mask, fn func(*Entity)) {
 		}
 	}
 }
+
+// Update moves new entities from the toAdd slice to entities slice, and
+// removes any that are dead.
+func (m *Manager) Update(state component.State) {
+	m.entities = append(m.entities, m.toAdd...)
+	clear(m.toAdd)
+	m.toAdd = m.toAdd[:0]
+}

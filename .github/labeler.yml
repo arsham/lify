@@ -18,6 +18,10 @@ system:
   - system/
   - system/**/*
 
+scene:
+  - scene/
+  - scene/**/*
+
 build:
   - build/*
   - build/**/*

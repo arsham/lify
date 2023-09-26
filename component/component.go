@@ -40,4 +40,6 @@ type State uint16
 const (
 	// StateMoveEntities indicates that the system should move the entities.
 	StateMoveEntities State = 1 << iota
+	// StateRunning indicates that the system is running.
+	StateRunning
 )
