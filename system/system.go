@@ -3,16 +3,27 @@
 package system
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
+	"github.com/faiface/pixel"
 )
+
+// ErrInvalidArgument indicates that the given argument is invalid or missing.
+var ErrInvalidArgument = errors.New("invalid or missing argument")
 
 // controller is a controller for a system for querying dependencies.
 type controller interface {
 	// EntityManager returns the entity manager.
 	EntityManager() *entity.Manager
+	// ComponentManager returns the component manager.
+	ComponentManager() *component.Manager
+	// Target returns the target object to draw on.
+	Target() pixel.Target
+	// Bounds returns the bounds of the target.
+	Bounds() pixel.Rect
 }
 
 // A System should implement this interface.

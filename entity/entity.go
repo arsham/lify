@@ -69,3 +69,13 @@ func (m *Manager) NewEntity(mask Mask) *Entity {
 	}
 	return e
 }
+
+// MapByMask applies the given function to all the entities that match the
+// given mask.
+func (m *Manager) MapByMask(mask Mask, fn func(*Entity)) {
+	for _, e := range m.entities {
+		if e.mask&mask != 0 {
+			fn(e)
+		}
+	}
+}
