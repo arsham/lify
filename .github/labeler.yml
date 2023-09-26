@@ -1,6 +1,6 @@
 game:
-  - internal/game/*
-  - internal/game/**/*
+  - game/*
+  - game/**/*
 
 config:
   - internal/config/*
