@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
 	"github.com/arsham/neuragene/scene"
 	"github.com/arsham/neuragene/system"
+	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 )
@@ -28,6 +30,8 @@ type Engine struct {
 	Systems *system.Manager
 	// Entities is the entity manager.
 	Entities *entity.Manager
+	// Components is the component manager.
+	Components *component.Manager
 	// Title is the title of the window.
 	Title string
 	// lastFrameDuration is the duration of the previous frame.
@@ -68,4 +72,34 @@ func (e *Engine) Run() {
 // Scene returns the current scene.
 func (e *Engine) Scene() Scene {
 	return e.Scenes[e.CurrentScene]
+}
+
+// Setup calls the Setup() method of the system manager.
+func (e *Engine) Setup() error {
+	return e.Systems.Setup(e)
+}
+
+// Bounds returns the bounds of the target.
+func (e *Engine) Bounds() pixel.Rect {
+	return e.Window.Bounds()
+}
+
+// ComponentManager returns the component manager.
+func (e *Engine) ComponentManager() *component.Manager {
+	return e.Components
+}
+
+// EntityManager returns the entity manager.
+func (e *Engine) EntityManager() *entity.Manager {
+	return e.Entities
+}
+
+// Target returns the target object to draw on.
+func (e *Engine) Target() pixel.Target {
+	return e.Window
+}
+
+// SystemManager returns the system manager.
+func (e *Engine) SystemManager() *system.Manager {
+	return e.Systems
 }

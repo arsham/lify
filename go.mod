@@ -7,9 +7,8 @@ require (
 	github.com/faiface/pixel v0.10.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/kkyr/fig v0.3.2
-	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/magefile/mage v1.15.0
-	github.com/paulmach/orb v0.10.0
+	github.com/pkg/profile v1.7.0
 	golang.org/x/image v0.12.0
 )
 
@@ -17,9 +16,11 @@ require (
 	github.com/alecthomas/repr v0.2.0 // indirect
 	github.com/faiface/glhf v0.0.0-20211013000516-57b20770c369 // indirect
 	github.com/faiface/mainthread v0.0.0-20171120011319-8b78f0a41ae3 // indirect
+	github.com/felixge/fgprof v0.9.3 // indirect
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b // indirect
 	github.com/go-gl/mathgl v1.1.0 // indirect
+	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

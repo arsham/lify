@@ -2,82 +2,66 @@
 package main
 
 import (
-	"embed"
 	"fmt"
-	"image"
-	_ "image/png"
 	"log/slog"
-	"os"
-	"path/filepath"
-	"time"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"golang.org/x/image/colornames"
+	"github.com/pkg/profile"
 
+	"github.com/arsham/neuragene/entity"
+	"github.com/arsham/neuragene/game"
 	"github.com/arsham/neuragene/internal/config"
+	"github.com/arsham/neuragene/scene"
+	"github.com/arsham/neuragene/system"
 )
-
-//go:embed assets
-var assets embed.FS
 
 func main() {
 	env, err := config.Config()
 	if err != nil {
 		slog.Error("Failed getting configuration: %w", err)
 	}
+	defer profile.Start(
+		profile.CPUProfile,
+		profile.ProfilePath("./tmp/profiles"),
+		profile.NoShutdownHook,
+	).Stop()
 
-	pixelgl.Run(func() { run(env) })
+	pixelgl.Run(func() {
+		err := run(env)
+		if err != nil {
+			slog.Error("Error running simulation: %w", err)
+		}
+	})
 }
 
-func run(env *config.Env) {
+func run(env *config.Env) error {
 	cfg := pixelgl.WindowConfig{
-		Title:     "Pixel Rocks!",
+		Title:     "Neuragene",
 		Bounds:    pixel.R(0, 0, float64(env.UI.Width), float64(env.UI.Height)),
 		VSync:     true,
 		Resizable: true,
 	}
 	win, err := pixelgl.NewWindow(cfg)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("creating new window: %w", err)
 	}
 
-	pic, err := loadPicture(filepath.Join("assets", "images", "herb1.png"))
+	em := entity.NewManager(10)
+	sm := system.NewManager(4)
+	g := &game.Engine{
+		Window:       win,
+		Entities:     em,
+		Systems:      sm,
+		CurrentScene: scene.PlayScene,
+	}
+	g.Scenes = map[scene.Type]game.Scene{
+		scene.PlayScene: scene.NewPlay(g),
+	}
+	err = g.Setup()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("setting up the engine: %w", err)
 	}
-
-	sprite := pixel.NewSprite(pic, pic.Bounds())
-	sprite.Draw(win, pixel.IM)
-	sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
-
-	frames := 0
-	second := time.Tick(time.Second)
-
-	for !win.Closed() {
-		win.Clear(colornames.Whitesmoke)
-
-		win.Update()
-
-		frames++
-		select {
-		case <-second:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
-			frames = 0
-		default:
-		}
-	}
-}
-
-func loadPicture(path string) (pixel.Picture, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-	return pixel.PictureDataFromImage(img), nil
+	g.Run()
+	return nil
 }
