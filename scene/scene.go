@@ -2,6 +2,9 @@
 package scene
 
 import (
+	"github.com/faiface/pixel/pixelgl"
+
+	"github.com/arsham/neuragene/action"
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
 	"github.com/arsham/neuragene/system"
@@ -31,6 +34,8 @@ type Generic struct {
 	// controller is the game object that provides vital information to the
 	// scene.
 	controller controller
+	// actionMap contains all the actions a scene can act on.
+	actionMap map[pixelgl.Button]action.Name
 	// state is the current state of the game.
 	state      component.State
 	frameCount int64
@@ -40,8 +45,24 @@ type Generic struct {
 type derivedScene interface {
 	// Update updates the system.
 	Update(dt float64)
+	// Do applies the action on the scene state.
+	Do(a action.Action)
 }
 
 func (g *Generic) update() {
 	g.frameCount++
 }
+
+// RegisterAction registers the given button/mouse action with the associated
+// name.
+func (g *Generic) RegisterAction(key pixelgl.Button, name action.Name) {
+	g.actionMap[key] = name
+}
+
+// Actions returns all registered actions.
+func (g *Generic) Actions() map[pixelgl.Button]action.Name {
+	return g.actionMap
+}
+
+// State returns the current state of the scene.
+func (g *Generic) State() component.State { return g.state }

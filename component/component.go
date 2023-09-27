@@ -44,4 +44,6 @@ const (
 	StateMoveEntities State = 1 << iota
 	// StateRunning indicates that the system is running.
 	StateRunning
+	// StateQuit sets the game to a state that causes it to quit.
+	StateQuit
 )

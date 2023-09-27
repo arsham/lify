@@ -27,6 +27,8 @@ type controller interface {
 	Bounds() pixel.Rect
 	// AssetManager returns the asset manager.
 	AssetManager() *asset.Manager
+	// InputDevice returns an object that informs the last action by the user.
+	InputDevice() InputDevice
 }
 
 // A System should implement this interface.

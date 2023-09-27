@@ -10,6 +10,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 
+	"github.com/arsham/neuragene/action"
 	"github.com/arsham/neuragene/asset"
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
@@ -18,32 +19,36 @@ import (
 	"github.com/arsham/neuragene/system"
 )
 
-// A Scene defines the contract for communicating with the currently processing
-// scene.
-type Scene interface {
+// A sceneRunner defines the contract for communicating with the currently
+// processing scene.
+type sceneRunner interface {
 	Update(dt float64)
+	Do(action.Action)
+	Actions() map[pixelgl.Button]action.Name
+	// State returns the current state of the scene.
+	State() component.State
 }
 
 // The Engine manages the game loop and makes decisions on changing scenes.
 type Engine struct {
-	// Window is the current window.
-	Window *pixelgl.Window
-	// Scenes is a map of all available scenes.
-	Scenes map[scene.Type]Scene
-	// Systems is the system manager.
-	Systems *system.Manager
-	// Entities is the entity manager.
-	Entities *entity.Manager
-	// Components is the component manager.
-	Components *component.Manager
-	// Assets is the asset manager.
-	Assets *asset.Manager
-	// Title is the title of the window.
-	Title string
+	// window is the current window.
+	window *pixelgl.Window
+	// scenes is a map of all available scenes.
+	scenes map[scene.Type]sceneRunner
+	// systems is the system manager.
+	systems *system.Manager
+	// entities is the entity manager.
+	entities *entity.Manager
+	// components is the component manager.
+	components *component.Manager
+	// assets is the asset manager.
+	assets *asset.Manager
+	// title is the title of the window.
+	title string
 	// lastFrameDuration is the duration of the previous frame.
 	lastFrameDuration time.Duration
-	// CurrentScene is the currently playing scene.
-	CurrentScene scene.Type
+	// currentScene is the currently playing scene.
+	currentScene scene.Type
 	// When running is set to false the game loop will stop.
 	running bool
 }
@@ -81,17 +86,20 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 		},
 	)
 	g := &Engine{
-		Window:       win,
-		Entities:     em,
-		Systems:      sm,
-		CurrentScene: scene.PlayScene,
-		Assets:       am,
-		Components:   components,
+		window:       win,
+		entities:     em,
+		systems:      sm,
+		currentScene: scene.PlayScene,
+		assets:       am,
+		components:   components,
 		running:      true,
 	}
-	g.Scenes = map[scene.Type]Scene{
+	g.scenes = map[scene.Type]sceneRunner{
 		scene.PlayScene: scene.NewPlay(g),
 	}
+	sm.Add(&system.UserInput{
+		Scene: func() system.Scene { return g.Scene() },
+	})
 	err = g.Setup()
 	if err != nil {
 		return nil, fmt.Errorf("setting up the engine: %w", err)
@@ -106,20 +114,24 @@ func (e *Engine) Run() {
 	frames := 0
 	second := time.NewTicker(time.Second)
 	last := time.Now()
-	for !e.Window.Closed() && e.running {
+	running := true
+	for !e.window.Closed() && running {
 		started := time.Now()
 		dt := time.Since(last).Seconds()
 		last = time.Now()
 
-		e.Window.Clear(colornames.Whitesmoke)
+		e.window.Clear(colornames.Whitesmoke)
 		e.Scene().Update(dt)
-		e.Window.Update()
+		e.window.Update()
+
+		// When the StateQuit bit is set we want to exit the game loop.
+		running = e.Scene().State()&component.StateQuit != component.StateQuit
 
 		e.lastFrameDuration = time.Since(started)
 		frames++
 		select {
 		case <-second.C:
-			e.Window.SetTitle(fmt.Sprintf("%s | FPS: %d", e.Title, frames))
+			e.window.SetTitle(fmt.Sprintf("%s | FPS: %d", e.title, frames))
 			frames = 0
 		default:
 		}
@@ -127,41 +139,46 @@ func (e *Engine) Run() {
 }
 
 // Scene returns the current scene.
-func (e *Engine) Scene() Scene {
-	return e.Scenes[e.CurrentScene]
+func (e *Engine) Scene() sceneRunner {
+	return e.scenes[e.currentScene]
 }
 
 // Setup calls the Setup() method of the system manager.
 func (e *Engine) Setup() error {
-	return e.Systems.Setup(e)
+	return e.systems.Setup(e)
 }
 
 // Bounds returns the bounds of the target.
 func (e *Engine) Bounds() pixel.Rect {
-	return e.Window.Bounds()
+	return e.window.Bounds()
 }
 
 // ComponentManager returns the component manager.
 func (e *Engine) ComponentManager() *component.Manager {
-	return e.Components
+	return e.components
 }
 
 // EntityManager returns the entity manager.
 func (e *Engine) EntityManager() *entity.Manager {
-	return e.Entities
+	return e.entities
 }
 
 // Target returns the target object to draw on.
 func (e *Engine) Target() pixel.Target {
-	return e.Window
+	return e.window
 }
 
 // SystemManager returns the system manager.
 func (e *Engine) SystemManager() *system.Manager {
-	return e.Systems
+	return e.systems
 }
 
 // AssetManager returns the asset manager.
 func (e *Engine) AssetManager() *asset.Manager {
-	return e.Assets
+	return e.assets
+}
+
+// InputDevice returns an object that informs the last action by the user.
+func (e *Engine) InputDevice() system.InputDevice {
+	return e.window
 }
