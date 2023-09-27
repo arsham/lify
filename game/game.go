@@ -50,8 +50,6 @@ type Engine struct {
 	lastFrameDuration time.Duration
 	// currentScene is the currently playing scene.
 	currentScene scene.Type
-	// When running is set to false the game loop will stop.
-	running bool
 }
 
 // NewEngine creates a new game engine with all the dependencies and sets up
@@ -116,7 +114,6 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 		currentScene: scene.PlayScene,
 		assets:       am,
 		components:   components,
-		running:      true,
 	}
 	g.scenes = map[scene.Type]sceneRunner{
 		scene.PlayScene: scene.NewPlay(g),

@@ -35,7 +35,10 @@ func (p *Position) Setup(c controller) error {
 }
 
 // Process moves the entities if their movement or velocity flags are set.
-func (p *Position) Process(_ component.State, dt float64) {
+func (p *Position) Process(state component.State, dt float64) {
+	if !all(state, component.StateRunning) {
+		return
+	}
 	bounds := p.bounds
 	posMap := p.components.Position
 	p.entities.MapByMask(entity.Positioned, func(e *entity.Entity) {
