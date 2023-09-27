@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/arsham/neuragene/asset"
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
 	"github.com/faiface/pixel"
@@ -24,6 +25,8 @@ type controller interface {
 	Target() pixel.Target
 	// Bounds returns the bounds of the target.
 	Bounds() pixel.Rect
+	// AssetManager returns the asset manager.
+	AssetManager() *asset.Manager
 }
 
 // A System should implement this interface.

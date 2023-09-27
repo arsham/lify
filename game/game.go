@@ -3,15 +3,19 @@ package game
 
 import (
 	"fmt"
+	"io/fs"
 	"time"
 
-	"github.com/arsham/neuragene/component"
-	"github.com/arsham/neuragene/entity"
-	"github.com/arsham/neuragene/scene"
-	"github.com/arsham/neuragene/system"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
+
+	"github.com/arsham/neuragene/asset"
+	"github.com/arsham/neuragene/component"
+	"github.com/arsham/neuragene/entity"
+	"github.com/arsham/neuragene/internal/config"
+	"github.com/arsham/neuragene/scene"
+	"github.com/arsham/neuragene/system"
 )
 
 // A Scene defines the contract for communicating with the currently processing
@@ -32,6 +36,8 @@ type Engine struct {
 	Entities *entity.Manager
 	// Components is the component manager.
 	Components *component.Manager
+	// Assets is the asset manager.
+	Assets *asset.Manager
 	// Title is the title of the window.
 	Title string
 	// lastFrameDuration is the duration of the previous frame.
@@ -40,6 +46,57 @@ type Engine struct {
 	CurrentScene scene.Type
 	// When running is set to false the game loop will stop.
 	running bool
+}
+
+// NewEngine creates a new game engine with all the dependencies and sets up
+// the first scene. It returns an error if any of the dependencies can't be
+// created.
+func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
+	cfg := pixelgl.WindowConfig{
+		Title:     "Neuragene",
+		Bounds:    pixel.R(0, 0, float64(env.UI.Width), float64(env.UI.Height)),
+		VSync:     true,
+		Resizable: true,
+	}
+	win, err := pixelgl.NewWindow(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("creating new window: %w", err)
+	}
+	am, err := asset.New(filesystem)
+	if err != nil {
+		return nil, fmt.Errorf("creating new asset manager: %w", err)
+	}
+
+	size := 1000
+	components := &component.Manager{
+		Position: make(map[uint64]*component.Position, size),
+	}
+	em := entity.NewManager(components, size)
+	sm := system.NewManager(10)
+	sm.Add(
+		&system.Rendering{
+			Title:  "Neuragene",
+			Width:  int32(env.UI.Width),
+			Height: int32(env.UI.Height),
+		},
+	)
+	g := &Engine{
+		Window:       win,
+		Entities:     em,
+		Systems:      sm,
+		CurrentScene: scene.PlayScene,
+		Assets:       am,
+		Components:   components,
+		running:      true,
+	}
+	g.Scenes = map[scene.Type]Scene{
+		scene.PlayScene: scene.NewPlay(g),
+	}
+	err = g.Setup()
+	if err != nil {
+		return nil, fmt.Errorf("setting up the engine: %w", err)
+	}
+	return g, nil
 }
 
 // Run listens to the user input and informs the current scene to update
@@ -102,4 +159,9 @@ func (e *Engine) Target() pixel.Target {
 // SystemManager returns the system manager.
 func (e *Engine) SystemManager() *system.Manager {
 	return e.Systems
+}
+
+// AssetManager returns the asset manager.
+func (e *Engine) AssetManager() *asset.Manager {
+	return e.Assets
 }

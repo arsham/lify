@@ -1,7 +1,10 @@
 // Package component contains the component data for handling entities' state.
 package component
 
-import "github.com/faiface/pixel"
+import (
+	"github.com/arsham/neuragene/asset"
+	"github.com/faiface/pixel"
+)
 
 // Manager manages components for entities. All values are maps of entity IDs
 // to their respective components. When an entity is removed, its ID is removed
@@ -9,15 +12,9 @@ import "github.com/faiface/pixel"
 type Manager struct {
 	// Position holds the position, scale, and velocity of entities.
 	Position map[uint64]*Position
+	// Sprite contains the sprite names for renderable entities.
+	Sprite map[uint64]*Sprite
 }
-
-// Component is used to identify a component.
-type Component uint8
-
-const (
-	// PositionComponent holds the position, scale, and velocity of an entity.
-	PositionComponent Component = iota + 1
-)
 
 // Position component holds the position, scale, velocity vector movement of an
 // entity. In order to get the angel of the entity, use the velocity vector.
@@ -30,6 +27,11 @@ type Position struct {
 	Velocity pixel.Vec
 	// Scale is the scale to draw the entity.
 	Scale float64
+}
+
+// Sprite contains the name of the sprite and the batch object for a sprite.
+type Sprite struct {
+	Name asset.Name
 }
 
 // State is used to identify a system's functionality. At each state, the

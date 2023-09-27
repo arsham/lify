@@ -14,6 +14,9 @@ const (
 	// Positioned mask indicates that the entity has a position, scale and
 	// velocity.
 	Positioned Mask = 1 << iota
+	// HasTecture mask indicates that the entity has a texture and should be
+	// rendered.
+	HasTecture
 )
 
 // An Entity is an element in the game that can have at least one component.
@@ -44,13 +47,11 @@ type Manager struct {
 
 // NewManager returns a new Manager with pre-allocated memory by the given
 // size.
-func NewManager(size int) *Manager {
+func NewManager(components *component.Manager, size int) *Manager {
 	return &Manager{
-		components: &component.Manager{
-			Position: make(map[uint64]*component.Position, size),
-		},
-		entities: make(List, 0, size),
-		toAdd:    make(List, 0, size),
+		components: components,
+		entities:   make(List, 0, size),
+		toAdd:      make(List, 0, size),
 	}
 }
 
@@ -82,7 +83,7 @@ func (m *Manager) MapByMask(mask Mask, fn func(*Entity)) {
 
 // Update moves new entities from the toAdd slice to entities slice, and
 // removes any that are dead.
-func (m *Manager) Update(state component.State) {
+func (m *Manager) Update(component.State) {
 	m.entities = append(m.entities, m.toAdd...)
 	clear(m.toAdd)
 	m.toAdd = m.toAdd[:0]
