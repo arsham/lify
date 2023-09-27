@@ -16,6 +16,8 @@ type Manager struct {
 	Sprite map[uint64]*Sprite
 	// Lifespan contains the lifespan of entities.
 	Lifespan map[uint64]*Lifespan
+	// Collision contains the bounding box of entities.
+	Collision map[uint64]*Collision
 }
 
 // Position component holds the position, scale, velocity vector movement of an
@@ -43,6 +45,13 @@ type Lifespan struct {
 	Remaining int
 }
 
+// Collision specifies the bounding box in which an entity will collide with
+// other entities.
+type Collision struct {
+	TopLeft     pixel.Vec
+	BottomRight pixel.Vec
+}
+
 // State is used to identify a system's functionality. At each state, the
 // system has a certain behaviour that can be determined by the bit masks based
 // on the available constants.
@@ -66,4 +75,7 @@ const (
 	// StateLimitLifespans indicates that the system should limit the lifespan
 	// of the entity.
 	StateLimitLifespans
+	// StateDrawBoundingBoxes indicates that the system should draw the entity's
+	// bounding box.
+	StateDrawBoundingBoxes
 )

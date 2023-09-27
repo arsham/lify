@@ -75,9 +75,10 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 
 	size := 1000
 	components := &component.Manager{
-		Position: make(map[uint64]*component.Position, size),
-		Sprite:   make(map[uint64]*component.Sprite, size),
-		Lifespan: make(map[uint64]*component.Lifespan, size),
+		Position:  make(map[uint64]*component.Position, size),
+		Sprite:    make(map[uint64]*component.Sprite, size),
+		Lifespan:  make(map[uint64]*component.Lifespan, size),
+		Collision: make(map[uint64]*component.Collision, size),
 	}
 	em := entity.NewManager(components, size)
 	sm := system.NewManager(10)
@@ -104,6 +105,9 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 		},
 		&system.Movement{},
 		&system.Lifespan{},
+		&system.BoundingBox{
+			Size: 1,
+		},
 	)
 	g := &Engine{
 		window:       win,

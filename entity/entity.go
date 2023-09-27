@@ -22,6 +22,8 @@ const (
 	Lifespan
 	// Died mask is used to mark dead entities.
 	Died
+	// BoxBounded is an entity that has a box boundary.
+	BoxBounded
 )
 
 // An Entity is an element in the game that can have at least one component.

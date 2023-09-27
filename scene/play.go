@@ -36,6 +36,7 @@ func NewPlay(c controller) *Play {
 	p.RegisterAction(pixelgl.KeyG, action.ToggleGrid)
 	p.RegisterAction(pixelgl.KeyF, action.ToggleLimitFPS)
 	p.RegisterAction(pixelgl.KeyL, action.ToggleLimitLifespans)
+	p.RegisterAction(pixelgl.KeyB, action.ToggleBoundingBoxes)
 	return p
 }
 
@@ -59,6 +60,8 @@ func (p *Play) Do(a action.Action) {
 			p.state ^= component.StateLimitFPS
 		case action.ToggleLimitLifespans:
 			p.state ^= component.StateLimitLifespans
+		case action.ToggleBoundingBoxes:
+			p.state ^= component.StateDrawBoundingBoxes
 		}
 	}
 }

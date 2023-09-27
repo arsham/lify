@@ -38,6 +38,8 @@ const (
 	ToggleLimitFPS
 	// ToggleLimitLifespans action toggles the lifespan limit.
 	ToggleLimitLifespans
+	// ToggleBoundingBoxes action toggles the bounding boxes.
+	ToggleBoundingBoxes
 )
 
 // An Action is an input state that would result in an activity in a scene.
