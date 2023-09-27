@@ -4,6 +4,8 @@ go 1.21.1
 
 require (
 	github.com/alecthomas/assert/v2 v2.3.0
+	github.com/buger/goterm v1.0.4
+	github.com/dustin/go-humanize v1.0.1
 	github.com/faiface/pixel v0.10.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/kkyr/fig v0.3.2

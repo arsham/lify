@@ -117,7 +117,7 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 	}
 	sm.Add(&system.UserInput{
 		Scene: func() system.Scene { return g.Scene() },
-	})
+	}, &system.Stats{Timer: g})
 	err = g.Setup()
 	if err != nil {
 		return nil, fmt.Errorf("setting up the engine: %w", err)
@@ -199,4 +199,9 @@ func (e *Engine) AssetManager() *asset.Manager {
 // InputDevice returns an object that informs the last action by the user.
 func (e *Engine) InputDevice() system.InputDevice {
 	return e.window
+}
+
+// LastFrameDuration returns the time it took to process previous frame.
+func (e *Engine) LastFrameDuration() time.Duration {
+	return e.lastFrameDuration
 }

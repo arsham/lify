@@ -26,6 +26,7 @@ func NewPlay(c controller) *Play {
 			state: component.StateRunning |
 				component.StateLimitFPS |
 				component.StateSpawnAnts |
+				component.StatePrintStats |
 				component.StateMoveEntities,
 		},
 	}

@@ -52,4 +52,6 @@ const (
 	StateLimitFPS
 	// StateSpawnAnts indicates that the system should spawn ants.
 	StateSpawnAnts
+	// StatePrintStats indicates that the system should print stats.
+	StatePrintStats
 )

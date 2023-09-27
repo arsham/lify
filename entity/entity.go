@@ -88,3 +88,8 @@ func (m *Manager) Update(component.State) {
 	clear(m.toAdd)
 	m.toAdd = m.toAdd[:0]
 }
+
+// Len returns the number of entities.
+func (m *Manager) Len() int {
+	return len(m.entities)
+}
