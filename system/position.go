@@ -13,6 +13,7 @@ import (
 type Position struct {
 	entities   *entity.Manager
 	components *component.Manager
+	controller controller
 	bounds     pixel.Rect
 }
 
@@ -24,7 +25,7 @@ func (p *Position) String() string { return "Position" }
 func (p *Position) Setup(c controller) error {
 	p.entities = c.EntityManager()
 	p.components = c.ComponentManager()
-	p.bounds = c.Bounds()
+	p.controller = c
 	if p.entities == nil {
 		return fmt.Errorf("%w: entity manager", ErrInvalidArgument)
 	}
@@ -39,6 +40,7 @@ func (p *Position) Process(state component.State, dt float64) {
 	if !all(state, component.StateRunning) {
 		return
 	}
+	p.bounds = p.controller.Bounds()
 	bounds := p.bounds
 	posMap := p.components.Position
 	p.entities.MapByMask(entity.Positioned, func(e *entity.Entity) {
