@@ -76,6 +76,7 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 	size := 1000
 	components := &component.Manager{
 		Position: make(map[uint64]*component.Position, size),
+		Sprite:   make(map[uint64]*component.Sprite, size),
 	}
 	em := entity.NewManager(components, size)
 	sm := system.NewManager(10)
@@ -95,6 +96,10 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 			GridSize: 100,
 			Size:     1,
 			Colour:   colornames.Lightskyblue,
+		},
+		&system.Ant{
+			Seed:         1,
+			MutationRate: 100,
 		},
 	)
 	g := &Engine{

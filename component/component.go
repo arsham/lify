@@ -50,4 +50,6 @@ const (
 	StateDrawGrids
 	// StateLimitFPS indicates that the system should limit the FPS.
 	StateLimitFPS
+	// StateSpawnAnts indicates that the system should spawn ants.
+	StateSpawnAnts
 )
