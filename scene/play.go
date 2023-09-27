@@ -28,6 +28,7 @@ func NewPlay(c controller) *Play {
 				component.StateSpawnAnts |
 				component.StatePrintStats |
 				component.StateLimitLifespans |
+				component.StateDrawTextures |
 				component.StateMoveEntities,
 		},
 	}
@@ -38,6 +39,7 @@ func NewPlay(c controller) *Play {
 	p.RegisterAction(pixelgl.KeyL, action.ToggleLimitLifespans)
 	p.RegisterAction(pixelgl.KeyB, action.ToggleBoundingBoxes)
 	p.RegisterAction(pixelgl.KeySpace, action.Pause)
+	p.RegisterAction(pixelgl.KeyT, action.ToggleTextures)
 	return p
 }
 
@@ -65,6 +67,8 @@ func (p *Play) Do(a action.Action) {
 			p.state ^= component.StateDrawBoundingBoxes
 		case action.Pause:
 			p.state ^= component.StateRunning
+		case action.ToggleTextures:
+			p.state ^= component.StateDrawTextures
 		}
 	}
 }

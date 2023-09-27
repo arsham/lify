@@ -78,4 +78,7 @@ const (
 	// StateDrawBoundingBoxes indicates that the system should draw the entity's
 	// bounding box.
 	StateDrawBoundingBoxes
+	// StateDrawTextures indicates that the system should draw the entity's
+	// texture.
+	StateDrawTextures
 )

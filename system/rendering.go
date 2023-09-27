@@ -50,7 +50,10 @@ func (r *Rendering) Setup(c controller) error {
 }
 
 // Process clears up the window and draws all entities on the screen.
-func (r *Rendering) Process(component.State, float64) {
+func (r *Rendering) Process(state component.State, _ float64) {
+	if !all(state, component.StateDrawTextures) {
+		return
+	}
 	batches := r.assets.Batches()
 	for _, b := range batches {
 		b.Clear()
