@@ -12,6 +12,7 @@ require (
 	github.com/magefile/mage v1.15.0
 	github.com/pkg/profile v1.7.0
 	golang.org/x/image v0.12.0
+	gonum.org/v1/gonum v0.14.0
 )
 
 require (

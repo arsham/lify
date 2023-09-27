@@ -26,9 +26,9 @@ build:
   - build/*
   - build/**/*
 
-ui:
-  - internal/ui/*
-  - internal/ui/**/*
+ai:
+  - internal/brain/*
+  - internal/brain/**/*
 
 ci:
   - .github/*
