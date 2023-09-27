@@ -82,11 +82,6 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 	sm := system.NewManager(10)
 	sm.Add(
 		&system.FPS{Max: 60},
-		&system.Rendering{
-			Title:  "Neuragene",
-			Width:  int32(env.UI.Width),
-			Height: int32(env.UI.Height),
-		},
 		&system.Grid{
 			GridSize: 10,
 			Size:     1,
@@ -97,10 +92,16 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 			Size:     1,
 			Colour:   colornames.Lightskyblue,
 		},
+		&system.Rendering{
+			Title:  "Neuragene",
+			Width:  int32(env.UI.Width),
+			Height: int32(env.UI.Height),
+		},
 		&system.Ant{
 			Seed:         1,
 			MutationRate: 100,
 		},
+		&system.Movement{},
 	)
 	g := &Engine{
 		window:       win,
