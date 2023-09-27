@@ -80,6 +80,7 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 	em := entity.NewManager(components, size)
 	sm := system.NewManager(10)
 	sm.Add(
+		&system.FPS{Max: 60},
 		&system.Rendering{
 			Title:  "Neuragene",
 			Width:  int32(env.UI.Width),

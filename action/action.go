@@ -34,6 +34,8 @@ const (
 	Quit Name = iota + 1
 	// ToggleGrid action toggles the grid.
 	ToggleGrid
+	// ToggleLimitFPS action toggles the FPS limit.
+	ToggleLimitFPS
 )
 
 // An Action is an input state that would result in an activity in a scene.

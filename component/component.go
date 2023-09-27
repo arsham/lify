@@ -48,4 +48,6 @@ const (
 	StateQuit
 	// StateDrawGrids indicates that the system should draw the grid.
 	StateDrawGrids
+	// StateLimitFPS indicates that the system should limit the FPS.
+	StateLimitFPS
 )

@@ -24,12 +24,14 @@ func NewPlay(c controller) *Play {
 			systems:    c.SystemManager(),
 			controller: c,
 			state: component.StateRunning |
+				component.StateLimitFPS |
 				component.StateMoveEntities,
 		},
 	}
 	p.RegisterAction(pixelgl.KeyEscape, action.Quit)
 	p.RegisterAction(pixelgl.KeyQ, action.Quit)
 	p.RegisterAction(pixelgl.KeyG, action.ToggleGrid)
+	p.RegisterAction(pixelgl.KeyF, action.ToggleLimitFPS)
 	return p
 }
 
@@ -49,6 +51,8 @@ func (p *Play) Do(a action.Action) {
 			p.state ^= component.StateQuit
 		case action.ToggleGrid:
 			p.state ^= component.StateDrawGrids
+		case action.ToggleLimitFPS:
+			p.state ^= component.StateLimitFPS
 		}
 	}
 }
