@@ -3,6 +3,7 @@ package game
 
 import (
 	"fmt"
+	"image/color"
 	"io/fs"
 	"time"
 
@@ -83,6 +84,16 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 			Title:  "Neuragene",
 			Width:  int32(env.UI.Width),
 			Height: int32(env.UI.Height),
+		},
+		&system.Grid{
+			GridSize: 10,
+			Size:     1,
+			Colour:   color.RGBA{220, 220, 250, 255},
+		},
+		&system.Grid{
+			GridSize: 100,
+			Size:     1,
+			Colour:   colornames.Lightskyblue,
 		},
 	)
 	g := &Engine{

@@ -32,6 +32,8 @@ type Name uint16
 const (
 	// Quit action causes the simulation to end.
 	Quit Name = iota + 1
+	// ToggleGrid action toggles the grid.
+	ToggleGrid
 )
 
 // An Action is an input state that would result in an activity in a scene.

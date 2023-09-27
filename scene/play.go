@@ -29,6 +29,7 @@ func NewPlay(c controller) *Play {
 	}
 	p.RegisterAction(pixelgl.KeyEscape, action.Quit)
 	p.RegisterAction(pixelgl.KeyQ, action.Quit)
+	p.RegisterAction(pixelgl.KeyG, action.ToggleGrid)
 	return p
 }
 
@@ -43,8 +44,11 @@ func (p *Play) Update(dt float64) {
 // Do applies the action on the scene state.
 func (p *Play) Do(a action.Action) {
 	if a.Phase == action.PhaseStart {
-		if a.Name == action.Quit {
+		switch a.Name {
+		case action.Quit:
 			p.state ^= component.StateQuit
+		case action.ToggleGrid:
+			p.state ^= component.StateDrawGrids
 		}
 	}
 }

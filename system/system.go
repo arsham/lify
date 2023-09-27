@@ -57,8 +57,8 @@ func NewManager(size int) *Manager {
 
 // Add adds the s system to the list. It doesn't check if the system is already
 // been added.
-func (m *Manager) Add(s System) *Manager {
-	m.systems = append(m.systems, s)
+func (m *Manager) Add(s ...System) *Manager {
+	m.systems = append(m.systems, s...)
 	return m
 }
 
@@ -78,4 +78,14 @@ func (m *Manager) Process(state component.State, dt float64) {
 	for _, s := range m.systems {
 		s.Process(state, dt)
 	}
+}
+
+// all returns false if any of the flags is not set in the state.
+func all(state component.State, flags ...component.State) bool {
+	for _, f := range flags {
+		if state&f != f {
+			return false
+		}
+	}
+	return true
 }

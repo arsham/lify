@@ -46,4 +46,6 @@ const (
 	StateRunning
 	// StateQuit sets the game to a state that causes it to quit.
 	StateQuit
+	// StateDrawGrids indicates that the system should draw the grid.
+	StateDrawGrids
 )
