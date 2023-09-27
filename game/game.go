@@ -77,6 +77,7 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 	components := &component.Manager{
 		Position: make(map[uint64]*component.Position, size),
 		Sprite:   make(map[uint64]*component.Sprite, size),
+		Lifespan: make(map[uint64]*component.Lifespan, size),
 	}
 	em := entity.NewManager(components, size)
 	sm := system.NewManager(10)
@@ -102,6 +103,7 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 			MutationRate: 100,
 		},
 		&system.Movement{},
+		&system.Lifespan{},
 	)
 	g := &Engine{
 		window:       win,

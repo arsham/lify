@@ -36,6 +36,8 @@ const (
 	ToggleGrid
 	// ToggleLimitFPS action toggles the FPS limit.
 	ToggleLimitFPS
+	// ToggleLimitLifespans action toggles the lifespan limit.
+	ToggleLimitLifespans
 )
 
 // An Action is an input state that would result in an activity in a scene.

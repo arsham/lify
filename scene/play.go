@@ -27,6 +27,7 @@ func NewPlay(c controller) *Play {
 				component.StateLimitFPS |
 				component.StateSpawnAnts |
 				component.StatePrintStats |
+				component.StateLimitLifespans |
 				component.StateMoveEntities,
 		},
 	}
@@ -34,6 +35,7 @@ func NewPlay(c controller) *Play {
 	p.RegisterAction(pixelgl.KeyQ, action.Quit)
 	p.RegisterAction(pixelgl.KeyG, action.ToggleGrid)
 	p.RegisterAction(pixelgl.KeyF, action.ToggleLimitFPS)
+	p.RegisterAction(pixelgl.KeyL, action.ToggleLimitLifespans)
 	return p
 }
 
@@ -55,6 +57,8 @@ func (p *Play) Do(a action.Action) {
 			p.state ^= component.StateDrawGrids
 		case action.ToggleLimitFPS:
 			p.state ^= component.StateLimitFPS
+		case action.ToggleLimitLifespans:
+			p.state ^= component.StateLimitLifespans
 		}
 	}
 }

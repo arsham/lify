@@ -55,7 +55,7 @@ func (a *Ant) Setup(c controller) error {
 	return nil
 }
 
-const antMask = entity.Positioned
+const antMask = entity.Positioned | entity.Lifespan
 
 // Process spawns an ant every 100 frames.
 // nolint:unparam // this is the expected behaviour.
@@ -97,6 +97,10 @@ func (a *Ant) spawnAnt() {
 	}
 	a.components.Sprite[id] = &component.Sprite{
 		Name: asset.Ant,
+	}
+	a.components.Lifespan[id] = &component.Lifespan{
+		Total:     500,
+		Remaining: 500,
 	}
 	a.lastSpawn = a.lastFrame
 }

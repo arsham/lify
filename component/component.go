@@ -14,6 +14,8 @@ type Manager struct {
 	Position map[uint64]*Position
 	// Sprite contains the sprite names for renderable entities.
 	Sprite map[uint64]*Sprite
+	// Lifespan contains the lifespan of entities.
+	Lifespan map[uint64]*Lifespan
 }
 
 // Position component holds the position, scale, velocity vector movement of an
@@ -32,6 +34,13 @@ type Position struct {
 // Sprite contains the name of the sprite and the batch object for a sprite.
 type Sprite struct {
 	Name asset.Name
+}
+
+// Lifespan specifies the total amount of frames that the entity should stay
+// alive, and the remaining frames.
+type Lifespan struct {
+	Total     int
+	Remaining int
 }
 
 // State is used to identify a system's functionality. At each state, the
@@ -54,4 +63,7 @@ const (
 	StateSpawnAnts
 	// StatePrintStats indicates that the system should print stats.
 	StatePrintStats
+	// StateLimitLifespans indicates that the system should limit the lifespan
+	// of the entity.
+	StateLimitLifespans
 )

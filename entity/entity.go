@@ -2,6 +2,7 @@
 package entity
 
 import (
+	"slices"
 	"sync/atomic"
 
 	"github.com/arsham/neuragene/component"
@@ -14,9 +15,13 @@ const (
 	// Positioned mask indicates that the entity has a position, scale and
 	// velocity.
 	Positioned Mask = 1 << iota
-	// HasTecture mask indicates that the entity has a texture and should be
+	// HasTexture mask indicates that the entity has a texture and should be
 	// rendered.
-	HasTecture
+	HasTexture
+	// Lifespan mask is used to set the lifespan for entities.
+	Lifespan
+	// Died mask is used to mark dead entities.
+	Died
 )
 
 // An Entity is an element in the game that can have at least one component.
@@ -83,13 +88,24 @@ func (m *Manager) MapByMask(mask Mask, fn func(*Entity)) {
 
 // Update moves new entities from the toAdd slice to entities slice, and
 // removes any that are dead.
-func (m *Manager) Update(component.State) {
+func (m *Manager) Update(state component.State) {
 	m.entities = append(m.entities, m.toAdd...)
 	clear(m.toAdd)
 	m.toAdd = m.toAdd[:0]
+
+	if state&component.StateLimitLifespans == component.StateLimitLifespans {
+		m.entities = slices.DeleteFunc(m.entities, func(e *Entity) bool {
+			return e.mask&Died == Died
+		})
+	}
 }
 
 // Len returns the number of entities.
 func (m *Manager) Len() int {
 	return len(m.entities)
+}
+
+// Kill marks the entity as dead. It will be removed on the next Update call.
+func (m *Manager) Kill(e *Entity) {
+	e.mask |= Died
 }

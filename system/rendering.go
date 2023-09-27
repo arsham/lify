@@ -66,7 +66,7 @@ func (r *Rendering) renderEntities() {
 	sprites := r.assets.Sprites()
 	spriteMap := r.components.Sprite
 	posMap := r.components.Position
-	r.entities.MapByMask(entity.Positioned|entity.HasTecture, func(e *entity.Entity) {
+	r.entities.MapByMask(entity.Positioned|entity.HasTexture, func(e *entity.Entity) {
 		sprite := spriteMap[e.ID]
 		position := posMap[e.ID]
 		sName := sprite.Name
