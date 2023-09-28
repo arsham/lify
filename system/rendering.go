@@ -63,12 +63,15 @@ func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
 			options.GeoM.Scale(position.Scale, position.Scale)
 		}
 
-		// We don't have the angel, but we have the velocity vector. Since the
+		// We don't have the angle, but we have the velocity vector. Since the
 		// sprite is positioned 90 degrees to the left, we need to rotate it a
 		// bit more.
-		angel := math.Atan2(position.Velocity.Y, position.Velocity.X) + math.Pi/2
-		options.GeoM.Rotate(angel)
-		options.GeoM.Translate(position.Pos.X, position.Pos.Y)
+		angel := position.Angle
+		if !position.Velocity.IsZero() {
+			angel = position.Velocity.Angle() + math.Pi/2
+		}
+		options.GeoM.Rotate(angel.F64())
+		options.GeoM.Translate(position.Vec().XY())
 		options.ColorScale.ScaleWithColor(colornames.Red)
 
 		screen.DrawImage(sprites[sName], options)

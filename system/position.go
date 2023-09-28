@@ -5,6 +5,7 @@ import (
 
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
+	"github.com/arsham/neuragene/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -49,26 +50,11 @@ func (p *Position) update(state component.State) error {
 		position := posMap[e.ID]
 		deltaX := position.Velocity.X / 100
 		deltaY := position.Velocity.Y / 100
-		position.Pos.X += deltaX
-		position.Pos.Y += deltaY
+		position.Add(deltaX, deltaY)
 
 		// Preventing the entity from going out of the screen.
-		if position.Pos.X > float64(x) {
-			position.Pos.X = float64(x)
-			position.Velocity.X = -position.Velocity.X
-		}
-		if position.Pos.X < 0 {
-			position.Pos.X = 0
-			position.Velocity.X = -position.Velocity.X
-		}
-		if position.Pos.Y > float64(y) {
-			position.Pos.Y = float64(y)
-			position.Velocity.Y = -position.Velocity.Y
-		}
-		if position.Pos.Y < 0 {
-			position.Pos.Y = 0
-			position.Velocity.Y = -position.Velocity.Y
-		}
+		container := geom.R(0, 0, float64(x), float64(y))
+		position.BounceBy(container)
 	})
 	return nil
 }

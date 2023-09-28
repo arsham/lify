@@ -24,7 +24,6 @@ func NewPlay(c controller) *Play {
 			systems:    c.SystemManager(),
 			controller: c,
 			state: component.StateRunning |
-				component.StateLimitFPS |
 				component.StateSpawnAnts |
 				component.StatePrintStats |
 				component.StateLimitLifespans |
@@ -50,6 +49,11 @@ func (p *Play) Update() error {
 	p.update()
 	if p.state&component.StateQuit != 0 {
 		return ebiten.Termination
+	}
+	if p.state&component.StateLimitFPS != 0 {
+		ebiten.SetTPS(400)
+	} else {
+		ebiten.SetTPS(60)
 	}
 	p.entities.Update(p.state)
 	return p.systems.Update(p.state)

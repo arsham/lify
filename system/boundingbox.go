@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/faiface/pixel"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/colornames"
@@ -12,6 +11,7 @@ import (
 	"github.com/arsham/neuragene/asset"
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
+	"github.com/arsham/neuragene/geom"
 )
 
 // BoundingBox system handles drawing of entitties' bounding boxes.
@@ -61,12 +61,10 @@ func (b *BoundingBox) update(state component.State) error {
 		id := e.ID
 		collision := collisions[id]
 		position := positions[id]
-		collision.Rect = collision.Resized(collision.Center(), pixel.V(position.Scale, position.Scale))
-		x := float32(position.Pos.X)
-		y := float32(position.Pos.Y)
-		width := float32(collision.Max.X)
-		height := float32(collision.Max.X)
-		vector.StrokeRect(b.canvas, x, y, width, height, 1, b.Colour, false)
+		collision.Rect = collision.Resized(collision.Centre(), geom.V(position.Scale, position.Scale))
+		x, y := position.Vec().XY()
+		w, h := collision.Max.XY()
+		vector.StrokeRect(b.canvas, float32(x-2*w), float32(y), float32(w*2), float32(h*2), 1, b.Colour, false)
 	})
 	return nil
 }

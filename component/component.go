@@ -3,7 +3,7 @@ package component
 
 import (
 	"github.com/arsham/neuragene/asset"
-	"github.com/faiface/pixel"
+	"github.com/arsham/neuragene/geom"
 )
 
 // Manager manages components for entities. All values are maps of entity IDs
@@ -21,16 +21,56 @@ type Manager struct {
 }
 
 // Position component holds the position, scale, velocity vector movement of an
-// entity. In order to get the angel of the entity, use the velocity vector.
+// entity. In order to get the angle of the entity, use the velocity vector.
 // The bit mask for this component is the StateMoveEntities constant.
 type Position struct {
 	// Pos is the centre position of the entity.
-	Pos pixel.Vec
+	Pos geom.Pos
 	// Velocity is the vector movement of the entity. This vector is not a unit
 	// vector.
-	Velocity pixel.Vec
+	Velocity geom.Vec
 	// Scale is the scale to draw the entity.
 	Scale float64
+	// Angle is the angle that the entity is facing when it is not moving. This
+	// should only be used for rendering.
+	Angle geom.Radian
+}
+
+// Vec returns the absolute position of the entity.
+func (p *Position) Vec() geom.Vec {
+	return p.Pos.Resolve()
+}
+
+// AddV adds the given vector to the position.
+func (p *Position) AddV(pos geom.Vec) {
+	p.Pos.Offset = p.Pos.Offset.Add(pos)
+}
+
+// Add adds the given values to the position.
+func (p *Position) Add(deltaX, deltaY float64) {
+	p.Pos.Offset.X += deltaX
+	p.Pos.Offset.Y += deltaY
+}
+
+// BounceBy causes the position to bounce back if it's out of the given
+// rectangle.
+func (p *Position) BounceBy(rec geom.Rect) {
+	if p.Pos.Offset.X < rec.Min.X {
+		p.Pos.Offset.X = rec.Min.X
+		p.Velocity.X = -p.Velocity.X
+	}
+	if p.Pos.Offset.X > rec.Max.X {
+		p.Pos.Offset.X = rec.Max.X
+		p.Velocity.X = -p.Velocity.X
+	}
+	if p.Pos.Offset.Y < rec.Min.Y {
+		p.Pos.Offset.Y = rec.Min.Y
+		p.Velocity.Y = -p.Velocity.Y
+	}
+	if p.Pos.Offset.Y > rec.Max.Y {
+		p.Pos.Offset.Y = rec.Max.Y
+		p.Velocity.Y = -p.Velocity.Y
+	}
 }
 
 // Sprite contains the name of the sprite and the batch object for a sprite.
@@ -48,7 +88,7 @@ type Lifespan struct {
 // Collision specifies the bounding box in which an entity will collide with
 // other entities.
 type Collision struct {
-	pixel.Rect
+	geom.Rect
 }
 
 // State is used to identify a system's functionality. At each state, the

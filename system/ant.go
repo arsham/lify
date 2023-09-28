@@ -4,12 +4,12 @@ import (
 	"fmt"
 	stdrand "math/rand"
 
-	"github.com/faiface/pixel"
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/arsham/neuragene/asset"
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
+	"github.com/arsham/neuragene/geom"
 )
 
 // Ant spawns ants when required.
@@ -48,10 +48,10 @@ func (a *Ant) setup(c controller) error {
 	}
 	a.sprite = a.assets.Sprites()[asset.Ant]
 	if a.MinVelocity == 0 {
-		a.MinVelocity = -200
+		a.MinVelocity = -400
 	}
 	if a.MaxVelocity == 0 {
-		a.MaxVelocity = 200
+		a.MaxVelocity = 400
 	}
 	return nil
 }
@@ -65,23 +65,20 @@ func (a *Ant) update(state component.State) error {
 	}
 	a.lastFrame++
 	diff := a.lastFrame - a.lastSpawn
-	if diff > 3 {
-		a.spawnAnt()
+	a.spawnAnt()
+	if diff > 30 {
+		a.lastSpawn = a.lastFrame
+		posMap := a.components.Position
+		a.entities.MapByMask(antMask, func(e *entity.Entity) {
+			position := posMap[e.ID]
+			coef := float64(1)
+			if a.rand.Intn(100) > 50 {
+				coef = -1
+			}
+			angle := coef * float64(a.rand.Intn(10))
+			position.Velocity = position.Velocity.Rotated(geom.NewRadian(angle))
+		})
 	}
-	posMap := a.components.Position
-	a.entities.MapByMask(antMask, func(e *entity.Entity) {
-		position := posMap[e.ID]
-		xScale := float64(10)
-		if a.rand.Intn(100) > 50 {
-			xScale = -10
-		}
-		position.Velocity.X += a.rand.Float64() * xScale
-		yScale := float64(10)
-		if a.rand.Intn(100) > 50 {
-			yScale = -10
-		}
-		position.Velocity.Y += a.rand.Float64() * yScale
-	})
 	return nil
 }
 
@@ -93,8 +90,9 @@ func (a *Ant) spawnAnt() {
 	id := ant.ID
 	a.components.Position[id] = &component.Position{
 		Scale:    scale,
-		Pos:      pixel.Vec{X: 500, Y: 500},
-		Velocity: pixel.Vec{X: x, Y: y},
+		Pos:      geom.P(500, 500),
+		Velocity: geom.Vec{X: x, Y: y},
+		Angle:    geom.NewRadian(float64(a.rand.Intn(360))),
 	}
 	a.components.Sprite[id] = &component.Sprite{
 		Name: asset.Ant,
@@ -105,11 +103,10 @@ func (a *Ant) spawnAnt() {
 	}
 
 	b := a.sprite.Bounds()
-	bounds := pixel.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
-	bounds = bounds.Resized(bounds.Center(), pixel.V(scale, scale))
+	bounds := geom.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
+	bounds = bounds.Resized(bounds.Centre(), geom.V(scale, scale))
 
 	a.components.Collision[id] = &component.Collision{Rect: bounds}
-	a.lastSpawn = a.lastFrame
 }
 
 func (*Ant) draw(*ebiten.Image, component.State) {}
