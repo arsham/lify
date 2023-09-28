@@ -2,7 +2,8 @@
 package scene
 
 import (
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/arsham/neuragene/action"
 	"github.com/arsham/neuragene/component"
@@ -35,7 +36,10 @@ type Generic struct {
 	// scene.
 	controller controller
 	// actionMap contains all the actions a scene can act on.
-	actionMap map[pixelgl.Button]action.Name
+	actionMap map[ebiten.Key]action.Name
+	// actOnFn should be provided by the sub-scenes otherwise they can't
+	// receive user input.
+	actOnFn func(action.Action)
 	// state is the current state of the game.
 	state      component.State
 	frameCount int64
@@ -43,26 +47,36 @@ type Generic struct {
 
 // A system should implement this interface.
 type derivedScene interface {
-	// Update updates the system.
-	Update(dt float64)
-	// Do applies the action on the scene state.
-	Do(a action.Action)
+	// Update updates the game state. When the scene wants to exit it will
+	// return an ebitern.Termination error.
+	Update() error
+	// Draw draws the system's state onto the screen.
+	Draw(screen *ebiten.Image)
 }
 
 func (g *Generic) update() {
 	g.frameCount++
+	for key, name := range g.actionMap {
+		if inpututil.IsKeyJustPressed(key) {
+			g.actOnFn(action.Action{
+				Key:   key,
+				Name:  name,
+				Phase: action.PhaseStart,
+			})
+			continue
+		}
+		if inpututil.IsKeyJustReleased(key) {
+			g.actOnFn(action.Action{
+				Key:   key,
+				Name:  name,
+				Phase: action.PhaseEnd,
+			})
+		}
+	}
 }
 
-// RegisterAction registers the given button/mouse action with the associated
+// registerAction registers the given button/mouse action with the associated
 // name.
-func (g *Generic) RegisterAction(key pixelgl.Button, name action.Name) {
+func (g *Generic) registerAction(key ebiten.Key, name action.Name) {
 	g.actionMap[key] = name
 }
-
-// Actions returns all registered actions.
-func (g *Generic) Actions() map[pixelgl.Button]action.Name {
-	return g.actionMap
-}
-
-// State returns the current state of the scene.
-func (g *Generic) State() component.State { return g.state }

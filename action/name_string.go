@@ -9,11 +9,17 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[Quit-1]
+	_ = x[ToggleGrid-2]
+	_ = x[ToggleLimitFPS-3]
+	_ = x[ToggleLimitLifespans-4]
+	_ = x[ToggleBoundingBoxes-5]
+	_ = x[Pause-6]
+	_ = x[ToggleTextures-7]
 }
 
-const _Name_name = "Quit"
+const _Name_name = "QuitToggleGridToggleLimitFPSToggleLimitLifespansToggleBoundingBoxesPauseToggleTextures"
 
-var _Name_index = [...]uint8{0, 4}
+var _Name_index = [...]uint8{0, 4, 14, 28, 48, 67, 72, 86}
 
 func (i Name) String() string {
 	i -= 1

@@ -48,8 +48,7 @@ type Lifespan struct {
 // Collision specifies the bounding box in which an entity will collide with
 // other entities.
 type Collision struct {
-	TopLeft     pixel.Vec
-	BottomRight pixel.Vec
+	pixel.Rect
 }
 
 // State is used to identify a system's functionality. At each state, the

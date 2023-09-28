@@ -5,7 +5,7 @@ import (
 	"embed"
 	"log/slog"
 
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pkg/profile"
 
 	"github.com/arsham/neuragene/game"
@@ -26,12 +26,13 @@ func main() {
 		profile.NoShutdownHook,
 	).Stop()
 
-	pixelgl.Run(func() {
-		g, err := game.NewEngine(env, &assets)
-		if err != nil {
-			slog.Error("Error running simulation: %w", err)
-			return
-		}
-		g.Run()
-	})
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	g, err := game.NewEngine(env, &assets)
+	if err != nil {
+		slog.Error("Error running simulation: %w", err)
+		return
+	}
+	if err := ebiten.RunGame(g); err != nil {
+		slog.Error(err.Error())
+	}
 }

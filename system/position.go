@@ -5,7 +5,7 @@ import (
 
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
-	"github.com/faiface/pixel"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Position system handles the Position of the entity. On each frame, it
@@ -14,15 +14,14 @@ type Position struct {
 	entities   *entity.Manager
 	components *component.Manager
 	controller controller
-	bounds     pixel.Rect
 }
 
 var _ System = (*Position)(nil)
 
 func (p *Position) String() string { return "Position" }
 
-// Setup returns an error if the window or the entity manager is nil.
-func (p *Position) Setup(c controller) error {
+// setup returns an error if the window or the entity manager is nil.
+func (p *Position) setup(c controller) error {
 	p.entities = c.EntityManager()
 	p.components = c.ComponentManager()
 	p.controller = c
@@ -35,35 +34,43 @@ func (p *Position) Setup(c controller) error {
 	return nil
 }
 
-// Process moves the entities if their movement or velocity flags are set.
-func (p *Position) Process(state component.State, dt float64) {
+// update moves the entities if their movement or velocity flags are set.
+func (p *Position) update(state component.State) error {
 	if !all(state, component.StateRunning) {
-		return
+		return nil
 	}
-	p.bounds = p.controller.Bounds()
-	bounds := p.bounds
+	// Velocity is the vector movement of the entity with speed of 100 pixels
+	// per frame. Since this method is called TPS times per second, we need to
+	// calculate the position of the entity based on the time passed (1/TPS).
+	// An entity can move diagonally, so we need to account for the angle.
+	x, y := ebiten.WindowSize()
 	posMap := p.components.Position
 	p.entities.MapByMask(entity.Positioned, func(e *entity.Entity) {
 		position := posMap[e.ID]
-		deltaX := position.Velocity.X * dt
-		deltaY := position.Velocity.Y * dt
+		deltaX := position.Velocity.X / 100
+		deltaY := position.Velocity.Y / 100
 		position.Pos.X += deltaX
 		position.Pos.Y += deltaY
-		if position.Pos.X > bounds.Max.X {
-			position.Pos.X = bounds.Max.X
+
+		// Preventing the entity from going out of the screen.
+		if position.Pos.X > float64(x) {
+			position.Pos.X = float64(x)
 			position.Velocity.X = -position.Velocity.X
 		}
-		if position.Pos.X < bounds.Min.X {
-			position.Pos.X = bounds.Min.X
+		if position.Pos.X < 0 {
+			position.Pos.X = 0
 			position.Velocity.X = -position.Velocity.X
 		}
-		if position.Pos.Y > bounds.Max.Y {
-			position.Pos.Y = bounds.Max.Y
+		if position.Pos.Y > float64(y) {
+			position.Pos.Y = float64(y)
 			position.Velocity.Y = -position.Velocity.Y
 		}
-		if position.Pos.Y < bounds.Min.Y {
-			position.Pos.Y = bounds.Min.Y
+		if position.Pos.Y < 0 {
+			position.Pos.Y = 0
 			position.Velocity.Y = -position.Velocity.Y
 		}
 	})
+	return nil
 }
+
+func (p *Position) draw(*ebiten.Image, component.State) {}

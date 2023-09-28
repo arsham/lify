@@ -9,20 +9,17 @@ import (
 
 	tm "github.com/buger/goterm"
 	"github.com/dustin/go-humanize"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
 )
 
-// timer is an interface that returns the last frame duration.
-type timer interface {
-	LastFrameDuration() time.Duration
-}
-
 // Stats prints useful statistics every 2 seconds.
 type Stats struct {
 	entities   *entity.Manager
-	Timer      timer
+	controller controller
 	updateTime time.Time
 	dt         time.Duration
 	filterTime time.Duration
@@ -34,32 +31,45 @@ var _ System = (*Stats)(nil)
 
 func (s *Stats) String() string { return "Stats" }
 
-// Setup returns an error if the entity manager is nil.
-func (s *Stats) Setup(c controller) error {
+// setup returns an error if the entity manager is nil.
+func (s *Stats) setup(c controller) error {
+	s.controller = c
 	s.entities = c.EntityManager()
 	if s.entities == nil {
 		return fmt.Errorf("%w: entity manager", ErrInvalidArgument)
+	}
+	if s.controller == nil {
+		return fmt.Errorf("%w: controller", ErrInvalidArgument)
 	}
 	s.updateTime = time.Now()
 	return nil
 }
 
-// Process prints the stats if the last time it was printed was 2 seconds ago.
-func (s *Stats) Process(state component.State, _ float64) {
+// update prints the stats if the last time it was printed was 2 seconds ago.
+func (s *Stats) update(state component.State) error {
 	if !all(state, component.StatePrintStats) {
-		return
+		return nil
 	}
 	s.frameCount++
 	s.fps++
 	if time.Since(s.updateTime) >= time.Second*2 {
-		s.dt = s.Timer.LastFrameDuration()
+		s.dt = s.controller.LastFrameDuration()
 		t1 := time.Now()
 		s.entities.MapByMask(0b111111, func(*entity.Entity) {})
-		s.filterTime = time.Since(t1)
 		printStats(s.entities, s)
+		s.filterTime = time.Since(t1)
 		s.updateTime = time.Now()
 		s.fps = 0
 	}
+	return nil
+}
+
+func (s *Stats) draw(screen *ebiten.Image, state component.State) {
+	if !all(state, component.StatePrintStats) {
+		return
+	}
+	msg := fmt.Sprintf("TPS: %0.2f\nFPS: %0.2f", ebiten.ActualTPS(), ebiten.ActualFPS())
+	ebitenutil.DebugPrint(screen, msg)
 }
 
 func printCurrentTime() {

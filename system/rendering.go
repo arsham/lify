@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/faiface/pixel"
+	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/colornames"
 
 	"github.com/arsham/neuragene/asset"
@@ -14,7 +14,6 @@ import (
 
 // Rendering system renders to the screen.
 type Rendering struct {
-	target     pixel.Target
 	entities   *entity.Manager
 	assets     *asset.Manager
 	components *component.Manager
@@ -27,16 +26,12 @@ var _ System = (*Rendering)(nil)
 
 func (r *Rendering) String() string { return "Rendering" }
 
-// Setup returns an error if the window manager, entity manager, the asset
+// setup returns an error if the window manager, entity manager, the asset
 // manager, or the components manager is nil.
-func (r *Rendering) Setup(c controller) error {
-	r.target = c.Target()
+func (r *Rendering) setup(c controller) error {
 	r.entities = c.EntityManager()
 	r.assets = c.AssetManager()
 	r.components = c.ComponentManager()
-	if r.target == nil {
-		return fmt.Errorf("%w: window", ErrInvalidArgument)
-	}
 	if r.entities == nil {
 		return fmt.Errorf("%w: entity manager", ErrInvalidArgument)
 	}
@@ -49,23 +44,13 @@ func (r *Rendering) Setup(c controller) error {
 	return nil
 }
 
-// Process clears up the window and draws all entities on the screen.
-func (r *Rendering) Process(state component.State, _ float64) {
+func (*Rendering) update(component.State) error { return nil }
+
+// draw clears up the window and draws all entities on the screen.
+func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
 	if !all(state, component.StateDrawTextures) {
 		return
 	}
-	batches := r.assets.Batches()
-	for _, b := range batches {
-		b.Clear()
-	}
-	r.renderEntities()
-	for _, b := range batches {
-		b.Draw(r.target)
-	}
-}
-
-func (r *Rendering) renderEntities() {
-	batches := r.assets.Batches()
 	sprites := r.assets.Sprites()
 	spriteMap := r.components.Sprite
 	posMap := r.components.Position
@@ -73,17 +58,19 @@ func (r *Rendering) renderEntities() {
 		sprite := spriteMap[e.ID]
 		position := posMap[e.ID]
 		sName := sprite.Name
-		mat := pixel.IM
+		options := &ebiten.DrawImageOptions{}
 		if position.Scale != 0 {
-			mat = mat.Scaled(pixel.Vec{}, position.Scale)
+			options.GeoM.Scale(position.Scale, position.Scale)
 		}
-		mat = mat.Moved(position.Pos)
+
 		// We don't have the angel, but we have the velocity vector. Since the
 		// sprite is positioned 90 degrees to the left, we need to rotate it a
 		// bit more.
-		angel := position.Velocity.Angle() - math.Pi/2
-		mat = mat.Rotated(position.Pos, angel)
-		batch := batches[sName]
-		sprites[sName].DrawColorMask(batch, mat, colornames.Red)
+		angel := math.Atan2(position.Velocity.Y, position.Velocity.X) + math.Pi/2
+		options.GeoM.Rotate(angel)
+		options.GeoM.Translate(position.Pos.X, position.Pos.Y)
+		options.ColorScale.ScaleWithColor(colornames.Red)
+
+		screen.DrawImage(sprites[sName], options)
 	})
 }

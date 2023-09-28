@@ -4,7 +4,7 @@ package action
 import (
 	"fmt"
 
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Phase specifies the behaviour of an action.
@@ -50,7 +50,7 @@ const (
 
 // An Action is an input state that would result in an activity in a scene.
 type Action struct {
-	Key   pixelgl.Button
+	Key   ebiten.Key
 	Phase Phase
 	Name  Name
 }

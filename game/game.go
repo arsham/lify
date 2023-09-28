@@ -7,11 +7,9 @@ import (
 	"io/fs"
 	"time"
 
-	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/colornames"
 
-	"github.com/arsham/neuragene/action"
 	"github.com/arsham/neuragene/asset"
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
@@ -23,17 +21,15 @@ import (
 // A sceneRunner defines the contract for communicating with the currently
 // processing scene.
 type sceneRunner interface {
-	Update(dt float64)
-	Do(action.Action)
-	Actions() map[pixelgl.Button]action.Name
-	// State returns the current state of the scene.
-	State() component.State
+	// Update updates the game state. When the scene wants to exit it will
+	// return an ebitern.Termination error.
+	Update() error
+	// Draw draws the system's state onto the screen.
+	Draw(screen *ebiten.Image)
 }
 
 // The Engine manages the game loop and makes decisions on changing scenes.
 type Engine struct {
-	// window is the current window.
-	window *pixelgl.Window
 	// scenes is a map of all available scenes.
 	scenes map[scene.Type]sceneRunner
 	// systems is the system manager.
@@ -44,6 +40,8 @@ type Engine struct {
 	components *component.Manager
 	// assets is the asset manager.
 	assets *asset.Manager
+	// second is a ticker for updating the window's title.
+	second *time.Ticker
 	// title is the title of the window.
 	title string
 	// lastFrameDuration is the duration of the previous frame.
@@ -56,16 +54,11 @@ type Engine struct {
 // the first scene. It returns an error if any of the dependencies can't be
 // created.
 func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
-	cfg := pixelgl.WindowConfig{
-		Title:     "Neuragene",
-		Bounds:    pixel.R(0, 0, float64(env.UI.Width), float64(env.UI.Height)),
-		VSync:     true,
-		Resizable: true,
-	}
-	win, err := pixelgl.NewWindow(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("creating new window: %w", err)
-	}
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	ebiten.SetVsyncEnabled(true)
+	ebiten.SetWindowTitle("Neuragene")
+	ebiten.SetWindowSize(env.UI.Width, env.UI.Height)
+
 	am, err := asset.New(filesystem)
 	if err != nil {
 		return nil, fmt.Errorf("creating new asset manager: %w", err)
@@ -81,7 +74,6 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 	em := entity.NewManager(components, size)
 	sm := system.NewManager(10)
 	sm.Add(
-		&system.FPS{Max: 60},
 		&system.Grid{
 			GridSize: 10,
 			Size:     1,
@@ -103,75 +95,61 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 		},
 		&system.Position{},
 		&system.Lifespan{},
+		&system.Stats{},
 		&system.BoundingBox{
 			Size: 1,
 		},
 	)
 	g := &Engine{
-		window:       win,
+		title:        "Neuragene",
 		entities:     em,
 		systems:      sm,
 		currentScene: scene.PlayScene,
 		assets:       am,
 		components:   components,
+		second:       time.NewTicker(time.Second),
 	}
 	g.scenes = map[scene.Type]sceneRunner{
 		scene.PlayScene: scene.NewPlay(g),
 	}
-	sm.Add(&system.UserInput{
-		Scene: func() system.Scene { return g.Scene() },
-	}, &system.Stats{Timer: g})
-	err = g.Setup()
+	err = g.systems.Setup(g)
 	if err != nil {
 		return nil, fmt.Errorf("setting up the engine: %w", err)
 	}
 	return g, nil
 }
 
-// Run listens to the user input and informs the current scene to update
-// itself. If the current scene returns a different scene, it will switch to
-// the new scene.
-func (e *Engine) Run() {
-	frames := 0
-	second := time.NewTicker(time.Second)
-	last := time.Now()
-	running := true
-	for !e.window.Closed() && running {
-		started := time.Now()
-		dt := time.Since(last).Seconds()
-		last = time.Now()
-
-		e.window.Clear(colornames.Whitesmoke)
-		e.Scene().Update(dt)
-		e.window.Update()
-
-		// When the StateQuit bit is set we want to exit the game loop.
-		running = e.Scene().State()&component.StateQuit != component.StateQuit
-
-		e.lastFrameDuration = time.Since(started)
-		frames++
-		select {
-		case <-second.C:
-			e.window.SetTitle(fmt.Sprintf("%s | FPS: %d", e.title, frames))
-			frames = 0
-		default:
-		}
+// Update updates a game by one tick. The given argument represents a screen
+// image.
+func (e *Engine) Update() error {
+	// TODO: move this to the stats system, or even completely ignore it and
+	// show these on the HUD.
+	select {
+	case <-e.second.C:
+		ebiten.SetWindowTitle(fmt.Sprintf("%s | FPS: %.2f", e.title, ebiten.ActualTPS()))
+	default:
 	}
+	return e.scene().Update()
 }
 
-// Scene returns the current scene.
-func (e *Engine) Scene() sceneRunner {
+// Draw draws the game screen onto the screen.
+func (e *Engine) Draw(screen *ebiten.Image) {
+	started := time.Now()
+	screen.Clear()
+	screen.Fill(colornames.Whitesmoke)
+	e.scene().Draw(screen)
+	e.lastFrameDuration = time.Since(started)
+}
+
+// Layout accepts a native outside size in device-independent pixels and
+// returns the game's logical screen size.
+func (e *Engine) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return outsideWidth, outsideHeight
+}
+
+// scene returns the current scene.
+func (e *Engine) scene() sceneRunner {
 	return e.scenes[e.currentScene]
-}
-
-// Setup calls the Setup() method of the system manager.
-func (e *Engine) Setup() error {
-	return e.systems.Setup(e)
-}
-
-// Bounds returns the bounds of the target.
-func (e *Engine) Bounds() pixel.Rect {
-	return e.window.Bounds()
 }
 
 // ComponentManager returns the component manager.
@@ -184,11 +162,6 @@ func (e *Engine) EntityManager() *entity.Manager {
 	return e.entities
 }
 
-// Target returns the target object to draw on.
-func (e *Engine) Target() pixel.Target {
-	return e.window
-}
-
 // SystemManager returns the system manager.
 func (e *Engine) SystemManager() *system.Manager {
 	return e.systems
@@ -197,11 +170,6 @@ func (e *Engine) SystemManager() *system.Manager {
 // AssetManager returns the asset manager.
 func (e *Engine) AssetManager() *asset.Manager {
 	return e.assets
-}
-
-// InputDevice returns an object that informs the last action by the user.
-func (e *Engine) InputDevice() system.InputDevice {
-	return e.window
 }
 
 // LastFrameDuration returns the time it took to process previous frame.

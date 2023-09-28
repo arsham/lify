@@ -1,7 +1,7 @@
 package scene
 
 import (
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/arsham/neuragene/action"
 	"github.com/arsham/neuragene/component"
@@ -19,7 +19,7 @@ var _ derivedScene = &Play{}
 func NewPlay(c controller) *Play {
 	p := &Play{
 		Generic: &Generic{
-			actionMap:  make(map[pixelgl.Button]action.Name, 100),
+			actionMap:  make(map[ebiten.Key]action.Name, 100),
 			entities:   c.EntityManager(),
 			systems:    c.SystemManager(),
 			controller: c,
@@ -32,27 +32,36 @@ func NewPlay(c controller) *Play {
 				component.StateMoveEntities,
 		},
 	}
-	p.RegisterAction(pixelgl.KeyEscape, action.Quit)
-	p.RegisterAction(pixelgl.KeyQ, action.Quit)
-	p.RegisterAction(pixelgl.KeyG, action.ToggleGrid)
-	p.RegisterAction(pixelgl.KeyF, action.ToggleLimitFPS)
-	p.RegisterAction(pixelgl.KeyL, action.ToggleLimitLifespans)
-	p.RegisterAction(pixelgl.KeyB, action.ToggleBoundingBoxes)
-	p.RegisterAction(pixelgl.KeySpace, action.Pause)
-	p.RegisterAction(pixelgl.KeyT, action.ToggleTextures)
+	p.actOnFn = p.actOn
+	p.registerAction(ebiten.KeyEscape, action.Quit)
+	p.registerAction(ebiten.KeyQ, action.Quit)
+	p.registerAction(ebiten.KeyG, action.ToggleGrid)
+	p.registerAction(ebiten.KeyF, action.ToggleLimitFPS)
+	p.registerAction(ebiten.KeyL, action.ToggleLimitLifespans)
+	p.registerAction(ebiten.KeyB, action.ToggleBoundingBoxes)
+	p.registerAction(ebiten.KeySpace, action.Pause)
+	p.registerAction(ebiten.KeyT, action.ToggleTextures)
 	return p
 }
 
 // Update updates the system. If any of the system reports the next state
 // should be `stop`, it updates its state to be paused.
-func (p *Play) Update(dt float64) {
+func (p *Play) Update() error {
 	p.update()
+	if p.state&component.StateQuit != 0 {
+		return ebiten.Termination
+	}
 	p.entities.Update(p.state)
-	p.systems.Process(p.state, dt)
+	return p.systems.Update(p.state)
+}
+
+// Draw draws the game screen onto the screen.
+func (p *Play) Draw(screen *ebiten.Image) {
+	p.systems.Draw(screen, p.state)
 }
 
 // Do applies the action on the scene state.
-func (p *Play) Do(a action.Action) {
+func (p *Play) actOn(a action.Action) {
 	if a.Phase == action.PhaseStart {
 		switch a.Name {
 		case action.Quit:

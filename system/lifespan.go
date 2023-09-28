@@ -5,6 +5,7 @@ import (
 
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Lifespan system handles the lifespan of entities. You should always use this
@@ -18,9 +19,9 @@ func (l *Lifespan) String() string { return "Lifespan" }
 
 var _ System = (*Lifespan)(nil)
 
-// Setup returns an error if the entity manager or the component manager is
+// setup returns an error if the entity manager or the component manager is
 // nil.
-func (l *Lifespan) Setup(c controller) error {
+func (l *Lifespan) setup(c controller) error {
 	l.entities = c.EntityManager()
 	l.components = c.ComponentManager()
 	if l.entities == nil {
@@ -32,10 +33,9 @@ func (l *Lifespan) Setup(c controller) error {
 	return nil
 }
 
-// Process draws the grid on the screen.
-func (l *Lifespan) Process(state component.State, _ float64) {
+func (l *Lifespan) update(state component.State) error {
 	if !all(state, component.StateRunning) {
-		return
+		return nil
 	}
 	// Note that we don't check the state here. We always want to process this,
 	// and then if required we kill the entities.
@@ -50,7 +50,9 @@ func (l *Lifespan) Process(state component.State, _ float64) {
 		}
 		if lifespan.Remaining <= 0 {
 			l.entities.Kill(e)
-			return
 		}
 	})
+	return nil
 }
+
+func (l *Lifespan) draw(*ebiten.Image, component.State) {}

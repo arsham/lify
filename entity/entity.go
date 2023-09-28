@@ -32,8 +32,8 @@ const (
 // all the maps in the Manager. You should not create an Entity directly,
 // instead you should use the Manager's NewEntity method.
 type Entity struct {
-	mask Mask
 	ID   uint64
+	mask Mask
 }
 
 // List contains a slice of Entity.

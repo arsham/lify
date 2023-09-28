@@ -5,11 +5,12 @@ package system
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/arsham/neuragene/asset"
 	"github.com/arsham/neuragene/component"
 	"github.com/arsham/neuragene/entity"
-	"github.com/faiface/pixel"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // ErrInvalidArgument indicates that the given argument is invalid or missing.
@@ -21,23 +22,18 @@ type controller interface {
 	EntityManager() *entity.Manager
 	// ComponentManager returns the component manager.
 	ComponentManager() *component.Manager
-	// Target returns the target object to draw on.
-	Target() pixel.Target
-	// Bounds returns the bounds of the target.
-	Bounds() pixel.Rect
 	// AssetManager returns the asset manager.
 	AssetManager() *asset.Manager
-	// InputDevice returns an object that informs the last action by the user.
-	InputDevice() InputDevice
+	// LastFrameDuration returns the time it took to execute the last frame.
+	LastFrameDuration() time.Duration
 }
 
 // A System should implement this interface.
 type System interface {
-	// Setup is a one-off call to prepare the system.
-	Setup(c controller) error
-	// Process is called on every frame. The current state of the system and
-	// the delayed time is passed.
-	Process(state component.State, dt float64)
+	// setup is a one-off call to prepare the system.
+	setup(c controller) error
+	update(state component.State) error
+	draw(screen *ebiten.Image, state component.State)
 	// String returns the name of the system.
 	String() string
 }
@@ -66,17 +62,28 @@ func (m *Manager) Add(s ...System) *Manager {
 // the systems returns an error.
 func (m *Manager) Setup(c controller) error {
 	for _, s := range m.systems {
-		if err := s.Setup(c); err != nil {
+		if err := s.setup(c); err != nil {
 			return fmt.Errorf("setting up %s system: %w", s, err)
 		}
 	}
 	return nil
 }
 
-// Process calls the Process method of the systems with the given next state.
-func (m *Manager) Process(state component.State, dt float64) {
+// Update updates the systems that have the given state.
+func (m *Manager) Update(state component.State) error {
 	for _, s := range m.systems {
-		s.Process(state, dt)
+		err := s.update(state)
+		if err != nil {
+			return fmt.Errorf("system %s encountered an error: %w", s, err)
+		}
+	}
+	return nil
+}
+
+// Draw draws the systems that have the given state.
+func (m *Manager) Draw(screen *ebiten.Image, state component.State) {
+	for _, s := range m.systems {
+		s.draw(screen, state)
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	stdrand "math/rand"
 
 	"github.com/faiface/pixel"
+	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/arsham/neuragene/asset"
 	"github.com/arsham/neuragene/component"
@@ -16,7 +17,7 @@ type Ant struct {
 	rand         *stdrand.Rand
 	entities     *entity.Manager
 	assets       *asset.Manager
-	sprite       *pixel.Sprite
+	sprite       *ebiten.Image
 	components   *component.Manager
 	MinVelocity  float64
 	MaxVelocity  float64
@@ -30,8 +31,8 @@ var _ System = (*Ant)(nil)
 
 func (a *Ant) String() string { return "Ant" }
 
-// Setup returns an error if the entity manager or the asset manager is nil.
-func (a *Ant) Setup(c controller) error {
+// setup returns an error if the entity manager or the asset manager is nil.
+func (a *Ant) setup(c controller) error {
 	a.rand = stdrand.New(stdrand.NewSource(a.Seed))
 	a.entities = c.EntityManager()
 	a.assets = c.AssetManager()
@@ -57,11 +58,10 @@ func (a *Ant) Setup(c controller) error {
 
 const antMask = entity.Positioned | entity.Lifespan | entity.BoxBounded
 
-// Process spawns an ant every 100 frames.
-// nolint:unparam // this is the expected behaviour.
-func (a *Ant) Process(state component.State, _ float64) {
+// update spawns an ant every 100 frames.
+func (a *Ant) update(state component.State) error {
 	if !all(state, component.StateSpawnAnts, component.StateRunning) {
-		return
+		return nil
 	}
 	a.lastFrame++
 	diff := a.lastFrame - a.lastSpawn
@@ -82,6 +82,7 @@ func (a *Ant) Process(state component.State, _ float64) {
 		}
 		position.Velocity.Y += a.rand.Float64() * yScale
 	})
+	return nil
 }
 
 func (a *Ant) spawnAnt() {
@@ -103,15 +104,12 @@ func (a *Ant) spawnAnt() {
 		Remaining: 500,
 	}
 
-	topLeft := a.sprite.Frame().Min.
-		Sub(a.sprite.Frame().Center()).
-		Scaled(scale)
-	bottomRight := a.sprite.Frame().Max.
-		Sub(a.sprite.Frame().Center()).
-		Scaled(scale)
-	a.components.Collision[id] = &component.Collision{
-		TopLeft:     topLeft,
-		BottomRight: bottomRight,
-	}
+	b := a.sprite.Bounds()
+	bounds := pixel.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
+	bounds = bounds.Resized(bounds.Center(), pixel.V(scale, scale))
+
+	a.components.Collision[id] = &component.Collision{Rect: bounds}
 	a.lastSpawn = a.lastFrame
 }
+
+func (*Ant) draw(*ebiten.Image, component.State) {}
