@@ -5,11 +5,11 @@ import (
 	"slices"
 	"sync/atomic"
 
-	"github.com/arsham/neuragene/component"
+	"github.com/arsham/neuragene/internal/component"
 )
 
 // Mask is used to determine if an entity supports a specific logic.
-type Mask uint16
+type Mask uint32
 
 const (
 	// Positioned mask indicates that the entity has a position, scale and

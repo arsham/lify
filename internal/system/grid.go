@@ -8,7 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/colornames"
 
-	"github.com/arsham/neuragene/component"
+	"github.com/arsham/neuragene/internal/component"
 )
 
 // Grid draws a grid on the screen.

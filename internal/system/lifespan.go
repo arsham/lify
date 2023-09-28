@@ -3,9 +3,10 @@ package system
 import (
 	"fmt"
 
-	"github.com/arsham/neuragene/component"
-	"github.com/arsham/neuragene/entity"
 	"github.com/hajimehoshi/ebiten/v2"
+
+	"github.com/arsham/neuragene/internal/component"
+	"github.com/arsham/neuragene/internal/entity"
 )
 
 // Lifespan system handles the lifespan of entities. You should always use this

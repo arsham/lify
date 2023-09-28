@@ -2,8 +2,8 @@
 package component
 
 import (
-	"github.com/arsham/neuragene/asset"
-	"github.com/arsham/neuragene/geom"
+	"github.com/arsham/neuragene/internal/asset"
+	"github.com/arsham/neuragene/internal/geom"
 )
 
 // Manager manages components for entities. All values are maps of entity IDs

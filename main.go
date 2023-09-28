@@ -8,11 +8,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pkg/profile"
 
-	"github.com/arsham/neuragene/game"
 	"github.com/arsham/neuragene/internal/config"
+	"github.com/arsham/neuragene/internal/game"
 )
 
-//go:embed bin
+//go:embed assets
 var assets embed.FS
 
 func main() {

@@ -3,8 +3,8 @@ package scene
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"github.com/arsham/neuragene/action"
-	"github.com/arsham/neuragene/component"
+	"github.com/arsham/neuragene/internal/action"
+	"github.com/arsham/neuragene/internal/component"
 )
 
 // Play is a scene that plays the simulation.

@@ -12,8 +12,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
-	"github.com/arsham/neuragene/component"
-	"github.com/arsham/neuragene/entity"
+	"github.com/arsham/neuragene/internal/component"
+	"github.com/arsham/neuragene/internal/entity"
 )
 
 // Stats prints useful statistics every 2 seconds.

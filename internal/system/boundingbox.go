@@ -8,10 +8,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/colornames"
 
-	"github.com/arsham/neuragene/asset"
-	"github.com/arsham/neuragene/component"
-	"github.com/arsham/neuragene/entity"
-	"github.com/arsham/neuragene/geom"
+	"github.com/arsham/neuragene/internal/asset"
+	"github.com/arsham/neuragene/internal/component"
+	"github.com/arsham/neuragene/internal/entity"
+	"github.com/arsham/neuragene/internal/geom"
 )
 
 // BoundingBox system handles drawing of entitties' bounding boxes.

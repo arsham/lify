@@ -5,10 +5,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
-	"github.com/arsham/neuragene/action"
-	"github.com/arsham/neuragene/component"
-	"github.com/arsham/neuragene/entity"
-	"github.com/arsham/neuragene/system"
+	"github.com/arsham/neuragene/internal/action"
+	"github.com/arsham/neuragene/internal/component"
+	"github.com/arsham/neuragene/internal/entity"
+	"github.com/arsham/neuragene/internal/system"
 )
 
 // Type is the type of different scenes.

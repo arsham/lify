@@ -35,7 +35,7 @@ func New(filesystem fs.FS) (*Manager, error) {
 		fs:      filesystem,
 	}
 
-	antPic, _, err := ebitenutil.NewImageFromFileSystem(a.fs, filepath.Join("bin", "images", "ant", "ant.png"))
+	antPic, _, err := ebitenutil.NewImageFromFileSystem(a.fs, filepath.Join("assets", "images", "ant.png"))
 	if err != nil {
 		return nil, fmt.Errorf("loading asset: %w", err)
 	}

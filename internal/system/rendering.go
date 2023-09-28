@@ -7,9 +7,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/colornames"
 
-	"github.com/arsham/neuragene/asset"
-	"github.com/arsham/neuragene/component"
-	"github.com/arsham/neuragene/entity"
+	"github.com/arsham/neuragene/internal/asset"
+	"github.com/arsham/neuragene/internal/component"
+	"github.com/arsham/neuragene/internal/entity"
 )
 
 // Rendering system renders to the screen.
