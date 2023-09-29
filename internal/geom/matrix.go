@@ -37,15 +37,16 @@ func (m *Matrix) Eq(other *Matrix) bool {
 }
 
 // Move moves the Matrix by the given Vec.
-func (m *Matrix) Move(v Vec) {
+func (m *Matrix) Move(v Vec) *Matrix {
 	for i := range m.Corners {
 		m.Corners[i].X += v.X
 		m.Corners[i].Y += v.Y
 	}
+	return m
 }
 
 // Rotate rotates the Matrix by the given angle in radians around its center.
-func (m *Matrix) Rotate(angle Radian) {
+func (m *Matrix) Rotate(angle Radian) *Matrix {
 	center := m.Center()
 	sin, cos := angle.Sincos()
 
@@ -63,6 +64,7 @@ func (m *Matrix) Rotate(angle Radian) {
 		m.Corners[i].X += center.X
 		m.Corners[i].Y += center.Y
 	}
+	return m
 }
 
 // Center calculates the center point of the Matrix.
@@ -98,11 +100,11 @@ func (m *Matrix) Edges() []Rect {
 }
 
 // Resize resizes the Matrix around the given anchor point.
-func (m *Matrix) Resize(anchor, size Vec) {
+func (m *Matrix) Resize(anchor, size Vec) *Matrix {
 	scaleX := size.X
 	scaleY := size.Y
 	if scaleX == 0 && scaleY == 0 {
-		return
+		return m
 	}
 
 	for i := range m.Corners {
@@ -118,4 +120,5 @@ func (m *Matrix) Resize(anchor, size Vec) {
 		m.Corners[i].X = scaledX + anchor.X
 		m.Corners[i].Y = scaledY + anchor.Y
 	}
+	return m
 }

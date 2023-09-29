@@ -104,7 +104,6 @@ func (a *Ant) spawnAnt() {
 
 	b := a.sprite.Bounds()
 	bounds := geom.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
-	bounds = bounds.Resized(bounds.Centre(), geom.V(scale, scale))
 
 	a.components.Collision[id] = &component.Collision{Rect: bounds}
 }

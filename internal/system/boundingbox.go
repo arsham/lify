@@ -3,6 +3,7 @@ package system
 import (
 	"fmt"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -61,10 +62,34 @@ func (b *BoundingBox) update(state component.State) error {
 		id := e.ID
 		collision := collisions[id]
 		position := positions[id]
-		collision.Rect = collision.Resized(collision.Centre(), geom.V(position.Scale, position.Scale))
-		x, y := position.Vec().XY()
-		w, h := collision.Max.XY()
-		vector.StrokeRect(b.canvas, float32(x-2*w), float32(y), float32(w*2), float32(h*2), 1, b.Colour, false)
+		angle := position.Angle
+		if !position.Velocity.IsZero() {
+			angle = position.Velocity.Angle() + math.Pi/2
+		}
+		rect := collision.Moved(position.Vec())
+		corners := []geom.Vec{{
+			X: rect.Min.X,
+			Y: rect.Min.Y,
+		}, {
+			X: rect.Max.X,
+			Y: rect.Min.Y,
+		}, {
+			X: rect.Max.X,
+			Y: rect.Max.Y,
+		}, {
+			X: rect.Min.X,
+			Y: rect.Max.Y,
+		}}
+		scale := geom.V(position.Scale, position.Scale)
+		m := geom.M(corners)
+		edges := m.Rotate(angle).
+			Resize(m.Center(), scale).
+			Edges()
+		for i := range edges {
+			from := edges[i].Min
+			to := edges[i].Max
+			vector.StrokeLine(b.canvas, float32(from.X), float32(from.Y), float32(to.X), float32(to.Y), 1, b.Colour, false)
+		}
 	})
 	return nil
 }

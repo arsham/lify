@@ -54,11 +54,18 @@ func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
 	sprites := r.assets.Sprites()
 	spriteMap := r.components.Sprite
 	posMap := r.components.Position
+	colMap := r.components.Collision
 	r.entities.MapByMask(entity.Positioned|entity.HasTexture, func(e *entity.Entity) {
 		sprite := spriteMap[e.ID]
 		position := posMap[e.ID]
-		sName := sprite.Name
+		collision := colMap[e.ID]
 		options := &ebiten.DrawImageOptions{}
+
+		r := collision.Rect
+		// Move the centre point to the top left corner so the rotation doesn't
+		// look wonky.
+		options.GeoM.Translate(-r.W()/2, -r.H()/2)
+
 		if position.Scale != 0 {
 			options.GeoM.Scale(position.Scale, position.Scale)
 		}
@@ -66,14 +73,19 @@ func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
 		// We don't have the angle, but we have the velocity vector. Since the
 		// sprite is positioned 90 degrees to the left, we need to rotate it a
 		// bit more.
-		angel := position.Angle
+		angle := position.Angle
 		if !position.Velocity.IsZero() {
-			angel = position.Velocity.Angle() + math.Pi/2
+			angle = position.Velocity.Angle() + math.Pi/2
 		}
-		options.GeoM.Rotate(angel.F64())
+		options.GeoM.Rotate(angle.F64())
+
+		// Move the image to the screen's centre.
+		options.GeoM.Translate(r.W()/2, r.H()/2)
+
 		options.GeoM.Translate(position.Vec().XY())
 		options.ColorScale.ScaleWithColor(colornames.Red)
 
-		screen.DrawImage(sprites[sName], options)
+		img := sprites[sprite.Name]
+		screen.DrawImage(img, options)
 	})
 }
