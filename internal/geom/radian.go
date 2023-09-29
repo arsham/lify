@@ -31,3 +31,8 @@ func (r Radian) Cos() float64 {
 func (r Radian) Sin() float64 {
 	return math.Sin(float64(r))
 }
+
+// Sincos returns the Sine and Cosine of the r.
+func (r Radian) Sincos() (float64, float64) {
+	return math.Sincos(float64(r))
+}
