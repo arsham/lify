@@ -105,7 +105,7 @@ func (a *Ant) spawnAnt() {
 	b := a.sprite.Bounds()
 	bounds := geom.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
 
-	a.components.Collision[id] = &component.Collision{Rect: bounds}
+	a.components.BoundingBox[id] = &component.BoundingBox{Rect: bounds}
 }
 
 func (*Ant) draw(*ebiten.Image, component.State) {}

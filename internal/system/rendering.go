@@ -51,17 +51,17 @@ func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
 	if !all(state, component.StateDrawTextures) {
 		return
 	}
-	sprites := r.assets.Sprites()
-	spriteMap := r.components.Sprite
-	posMap := r.components.Position
-	colMap := r.components.Collision
+	assets := r.assets.Sprites()
+	sprites := r.components.Sprite
+	positions := r.components.Position
+	boundingBoxes := r.components.BoundingBox
 	r.entities.MapByMask(entity.Positioned|entity.HasTexture, func(e *entity.Entity) {
-		sprite := spriteMap[e.ID]
-		position := posMap[e.ID]
-		collision := colMap[e.ID]
+		sprite := sprites[e.ID]
+		position := positions[e.ID]
+		boundingBox := boundingBoxes[e.ID]
 		options := &ebiten.DrawImageOptions{}
 
-		r := collision.Rect
+		r := boundingBox.Rect
 		// Move the centre point to the top left corner so the rotation doesn't
 		// look wonky.
 		options.GeoM.Translate(-r.W()/2, -r.H()/2)
@@ -85,7 +85,7 @@ func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
 		options.GeoM.Translate(position.Vec().XY())
 		options.ColorScale.ScaleWithColor(colornames.Red)
 
-		img := sprites[sprite.Name]
+		img := assets[sprite.Name]
 		screen.DrawImage(img, options)
 	})
 }
