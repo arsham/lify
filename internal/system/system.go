@@ -97,3 +97,7 @@ func all(state component.State, flags ...component.State) bool {
 	}
 	return true
 }
+
+type noDraw struct{}
+
+func (noDraw) draw(*ebiten.Image, component.State) {}

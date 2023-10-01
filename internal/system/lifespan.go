@@ -3,8 +3,6 @@ package system
 import (
 	"fmt"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/arsham/neuragene/internal/component"
 	"github.com/arsham/neuragene/internal/entity"
 )
@@ -12,6 +10,7 @@ import (
 // Lifespan system handles the lifespan of entities. You should always use this
 // system before the AI system, otherwise the AI can't collect the dead genes.
 type Lifespan struct {
+	noDraw
 	entities   *entity.Manager
 	components *component.Manager
 }
@@ -55,5 +54,3 @@ func (l *Lifespan) update(state component.State) error {
 	})
 	return nil
 }
-
-func (l *Lifespan) draw(*ebiten.Image, component.State) {}

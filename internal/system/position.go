@@ -13,6 +13,7 @@ import (
 // Position system handles the Position of the entity. On each frame, it
 // calculates the velocity and updates the position.
 type Position struct {
+	noDraw
 	entities   *entity.Manager
 	components *component.Manager
 	controller controller
@@ -59,5 +60,3 @@ func (p *Position) update(state component.State) error {
 	})
 	return nil
 }
-
-func (p *Position) draw(*ebiten.Image, component.State) {}

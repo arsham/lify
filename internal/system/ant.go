@@ -14,6 +14,7 @@ import (
 
 // Ant spawns ants when required.
 type Ant struct {
+	noDraw
 	rand         *stdrand.Rand
 	entities     *entity.Manager
 	assets       *asset.Manager
@@ -107,5 +108,3 @@ func (a *Ant) spawnAnt() {
 
 	a.components.BoundingBox[id] = &component.BoundingBox{Rect: bounds}
 }
-
-func (*Ant) draw(*ebiten.Image, component.State) {}
