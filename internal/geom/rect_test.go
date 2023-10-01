@@ -7,17 +7,7 @@ import (
 	"github.com/arsham/neuragene/internal/geom"
 )
 
-func TestRect(t *testing.T) {
-	t.Parallel()
-	t.Run("W", testRectW)
-	t.Run("H", testRectH)
-	t.Run("Centre", testRectCentre)
-	t.Run("Resized", testRectResized)
-	t.Run("Moved", testRectMoved)
-	t.Run("Rotated", testRectRotated)
-}
-
-func testRectW(t *testing.T) {
+func TestRectW(t *testing.T) {
 	t.Parallel()
 	tcs := map[string]struct {
 		r    geom.Rect
@@ -47,7 +37,7 @@ func testRectW(t *testing.T) {
 	}
 }
 
-func testRectH(t *testing.T) {
+func TestRectH(t *testing.T) {
 	t.Parallel()
 	tcs := map[string]struct {
 		r    geom.Rect
@@ -77,7 +67,7 @@ func testRectH(t *testing.T) {
 	}
 }
 
-func testRectCentre(t *testing.T) {
+func TestRectCentre(t *testing.T) {
 	t.Parallel()
 	tcs := map[string]struct {
 		r    geom.Rect
@@ -115,7 +105,7 @@ func testRectCentre(t *testing.T) {
 	}
 }
 
-func testRectResized(t *testing.T) {
+func TestRectResized(t *testing.T) {
 	t.Parallel()
 	tcs := map[string]struct {
 		r      geom.Rect
@@ -159,7 +149,7 @@ func testRectResized(t *testing.T) {
 	}
 }
 
-func testRectMoved(t *testing.T) {
+func TestRectMoved(t *testing.T) {
 	t.Parallel()
 	tcs := map[string]struct {
 		r     geom.Rect
@@ -198,7 +188,7 @@ func testRectMoved(t *testing.T) {
 	}
 }
 
-func testRectRotated(t *testing.T) {
+func TestRectRotated(t *testing.T) {
 	t.Parallel()
 	tcs := map[string]struct {
 		r     geom.Rect

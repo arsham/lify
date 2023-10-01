@@ -6,13 +6,9 @@ import (
 	"github.com/arsham/neuragene/internal/geom"
 )
 
-func BenchmarkRect(b *testing.B) {
-	b.Run("Resized", benchRectResized)
-}
-
 var aRect geom.Rect
 
-func benchRectResized(b *testing.B) {
+func BenchmarkRectResized(b *testing.B) {
 	r := geom.R(100, 100, 500, 500)
 	anchor := geom.V(50, 50)
 	size := geom.V(200, 200)

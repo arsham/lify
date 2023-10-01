@@ -8,15 +8,7 @@ import (
 	"github.com/arsham/neuragene/internal/geom"
 )
 
-func TestMatrix(t *testing.T) {
-	t.Parallel()
-	t.Run("Move", testMatrixMove)
-	t.Run("Rotate", testMatrixRotate)
-	t.Run("Center", testMatrixCenter)
-	t.Run("Redized", testMatrixResized)
-}
-
-func testMatrixMove(t *testing.T) {
+func TestMatrixMove(t *testing.T) {
 	t.Parallel()
 	tcs := map[string]struct {
 		m    *geom.Matrix
@@ -54,7 +46,7 @@ func testMatrixMove(t *testing.T) {
 	}
 }
 
-func testMatrixRotate(t *testing.T) {
+func TestMatrixRotate(t *testing.T) {
 	t.Parallel()
 	m := geom.M([]geom.Vec{
 		{X: 1, Y: 2},
@@ -72,7 +64,7 @@ func testMatrixRotate(t *testing.T) {
 	assert.True(t, want.Eq(m), "\nwant: %s\n got: %s", want, m)
 }
 
-func testMatrixCenter(t *testing.T) {
+func TestMatrixCenter(t *testing.T) {
 	t.Parallel()
 	m := geom.M([]geom.Vec{
 		{X: 1, Y: 2},
@@ -86,7 +78,7 @@ func testMatrixCenter(t *testing.T) {
 	assert.True(t, want.Eq(centre), "\nwant: %s\n got: %s", want, centre)
 }
 
-func testMatrixResized(t *testing.T) {
+func TestMatrixResized(t *testing.T) {
 	t.Parallel()
 	v1 := geom.V(1, 2)
 	v2 := geom.V(-13, 3)

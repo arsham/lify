@@ -10,22 +10,7 @@ import (
 	"github.com/arsham/neuragene/internal/geom"
 )
 
-func TestVec(t *testing.T) {
-	t.Parallel()
-	t.Run("XY", testVecXY)
-	t.Run("IsZero", testVecIsZero)
-	t.Run("Add", testVecAdd)
-	t.Run("Sub", testVecSub)
-	t.Run("Scaled", testVecScaled)
-	t.Run("ScaledXY", testVecScaledXY)
-	t.Run("Eq", testVecEq)
-	t.Run("Lerp", testVecLerp)
-	t.Run("Angle", testVecAngle)
-	t.Run("Rotated", testVecRotated)
-	t.Run("RotatedByVec", testVecRotatedByVec)
-}
-
-func testVecXY(t *testing.T) {
+func TestVecXY(t *testing.T) {
 	t.Parallel()
 	f := func(x, y float64) bool {
 		v := geom.V(x, y)
@@ -35,7 +20,7 @@ func testVecXY(t *testing.T) {
 	assert.NoError(t, quick.Check(f, nil))
 }
 
-func testVecIsZero(t *testing.T) {
+func TestVecIsZero(t *testing.T) {
 	t.Parallel()
 	v := geom.V(0, 0)
 	assert.True(t, v.IsZero())
@@ -47,7 +32,7 @@ func testVecIsZero(t *testing.T) {
 	assert.False(t, v.IsZero())
 }
 
-func testVecAdd(t *testing.T) {
+func TestVecAdd(t *testing.T) {
 	t.Parallel()
 	f := func(x1, y1, x2, y2 float64) bool {
 		v1 := geom.V(x1, y1)
@@ -58,7 +43,7 @@ func testVecAdd(t *testing.T) {
 	assert.NoError(t, quick.Check(f, nil))
 }
 
-func testVecSub(t *testing.T) {
+func TestVecSub(t *testing.T) {
 	t.Parallel()
 	f := func(x1, y1, x2, y2 float64) bool {
 		v1 := geom.V(x1, y1)
@@ -69,7 +54,7 @@ func testVecSub(t *testing.T) {
 	assert.NoError(t, quick.Check(f, nil))
 }
 
-func testVecScaled(t *testing.T) {
+func TestVecScaled(t *testing.T) {
 	t.Parallel()
 	f := func(x, y, c float64) bool {
 		v := geom.V(x, y)
@@ -79,7 +64,7 @@ func testVecScaled(t *testing.T) {
 	assert.NoError(t, quick.Check(f, nil))
 }
 
-func testVecScaledXY(t *testing.T) {
+func TestVecScaledXY(t *testing.T) {
 	t.Parallel()
 	f := func(x1, y1, x2, y2 float64) bool {
 		v1 := geom.V(x1, y1)
@@ -90,7 +75,7 @@ func testVecScaledXY(t *testing.T) {
 	assert.NoError(t, quick.Check(f, nil))
 }
 
-func testVecEq(t *testing.T) {
+func TestVecEq(t *testing.T) {
 	t.Parallel()
 	tcs := []struct {
 		a, b geom.Vec
@@ -131,7 +116,7 @@ func testVecEq(t *testing.T) {
 	}
 }
 
-func testVecLerp(t *testing.T) {
+func TestVecLerp(t *testing.T) {
 	t.Parallel()
 	tcs := []struct {
 		a, b geom.Vec
@@ -227,15 +212,14 @@ func testVecLerp(t *testing.T) {
 var ret geom.Vec
 
 func BenchmarkLerp(b *testing.B) {
-	b.ReportAllocs()
 	b.Run("Sequential", func(b *testing.B) {
-		b.ReportMetric(float64(b.N), "Iterations")
+		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			ret = geom.Lerp(geom.V(3, 7), geom.V(18, -20), 0.28)
 		}
 	})
 	b.Run("Parallel", func(b *testing.B) {
-		b.ReportMetric(float64(b.N), "Iterations")
+		b.ReportAllocs()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				ret = geom.Lerp(geom.V(3, 7), geom.V(18, -20), 0.28)
@@ -244,7 +228,7 @@ func BenchmarkLerp(b *testing.B) {
 	})
 }
 
-func testVecAngle(t *testing.T) {
+func TestVecAngle(t *testing.T) {
 	t.Parallel()
 	tcs := []struct {
 		v    geom.Vec
@@ -291,7 +275,7 @@ func testVecAngle(t *testing.T) {
 	}
 }
 
-func testVecRotated(t *testing.T) {
+func TestVecRotated(t *testing.T) {
 	t.Parallel()
 	tcs := []struct {
 		v     geom.Vec
@@ -337,17 +321,16 @@ func testVecRotated(t *testing.T) {
 	}
 }
 
-func BenchmarkRotated(b *testing.B) {
-	b.ReportAllocs()
+func BenchmarkVectRotated(b *testing.B) {
 	b.Run("Sequential", func(b *testing.B) {
-		b.ReportMetric(float64(b.N), "Iterations")
+		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			v := geom.V(3, 7)
 			ret = v.Rotated(geom.Radian(10))
 		}
 	})
 	b.Run("Parallel", func(b *testing.B) {
-		b.ReportMetric(float64(b.N), "Iterations")
+		b.ReportAllocs()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				v := geom.V(3, 7)
@@ -357,10 +340,9 @@ func BenchmarkRotated(b *testing.B) {
 	})
 }
 
-func BenchmarkRotatedByVec(b *testing.B) {
-	b.ReportAllocs()
+func BenchmarkVecRotatedByVec(b *testing.B) {
 	b.Run("Sequential", func(b *testing.B) {
-		b.ReportMetric(float64(b.N), "Iterations")
+		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			v := geom.V(3, 7)
 			other := geom.RadToVec(10)
@@ -368,7 +350,7 @@ func BenchmarkRotatedByVec(b *testing.B) {
 		}
 	})
 	b.Run("Parallel", func(b *testing.B) {
-		b.ReportMetric(float64(b.N), "Iterations")
+		b.ReportAllocs()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				v := geom.V(3, 7)
@@ -379,7 +361,7 @@ func BenchmarkRotatedByVec(b *testing.B) {
 	})
 }
 
-func testVecRotatedByVec(t *testing.T) {
+func TestVecRotatedByVec(t *testing.T) {
 	t.Parallel()
 	tcs := []struct {
 		v     geom.Vec
