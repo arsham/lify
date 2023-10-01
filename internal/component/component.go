@@ -120,4 +120,7 @@ const (
 	// StateDrawTextures indicates that the system should draw the entity's
 	// texture.
 	StateDrawTextures
+	// StateHandleCollisions indicates that the system should check for
+	// collisions.
+	StateHandleCollisions
 )

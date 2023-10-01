@@ -1,5 +1,7 @@
 package geom
 
+import "math"
+
 // Rect is a rectangle with a Min and Max position.
 type Rect struct {
 	Min Vec
@@ -85,4 +87,42 @@ func (r Rect) Rotated(angle Radian) Rect {
 // Eq returns true if both Min and Max vectors are approximately equal.
 func (r Rect) Eq(other Rect) bool {
 	return r.Min.Eq(other.Min) && r.Max.Eq(other.Max)
+}
+
+// Intersects returns true if the Rect intersects with the given Rect s.
+func (r Rect) Intersects(s Rect) bool {
+	return !(s.Max.X < r.Min.X ||
+		s.Min.X > r.Max.X ||
+		s.Max.Y < r.Min.Y ||
+		s.Min.Y > r.Max.Y)
+}
+
+// MinimumTranslationVector returns the minimum translation vector required for
+// compensating the given Rect s so that it no longer intersects with this
+// Rect. If the Rects don't overlap, this function returns a zero-vector.
+func (r Rect) MinimumTranslationVector(other Rect) Vec {
+	rW := r.W()
+	rH := r.H()
+	otherW := other.W()
+	otherH := other.H()
+	rCentre := r.Centre()
+	otherCentre := other.Centre()
+	overlapX := (rW+otherW)/2 - math.Abs(rCentre.X-otherCentre.X)
+	overlapY := (rH+otherH)/2 - math.Abs(rCentre.Y-otherCentre.Y)
+
+	// Minimum translation vector.
+	var mtvX, mtvY float64
+	// Determine the direction of the overlap.
+	switch {
+	case overlapX < overlapY && rCentre.X < otherCentre.X:
+		mtvX = -overlapX
+	case overlapX < overlapY:
+		mtvX = overlapX
+	case rCentre.Y < otherCentre.Y:
+		mtvY = -overlapY
+	default:
+		mtvY = overlapY
+	}
+
+	return V(mtvX, mtvY)
 }

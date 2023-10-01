@@ -57,7 +57,7 @@ func (a *Ant) setup(c controller) error {
 	return nil
 }
 
-const antMask = entity.Positioned | entity.Lifespan | entity.BoxBounded
+const antMask = entity.Positioned | entity.Lifespan | entity.BoxBounded | entity.Collides
 
 // update spawns an ant every 100 frames.
 func (a *Ant) update(state component.State) error {
@@ -91,7 +91,7 @@ func (a *Ant) spawnAnt() {
 	id := ant.ID
 	a.components.Position[id] = &component.Position{
 		Scale:    scale,
-		Pos:      geom.P(500, 500),
+		Pos:      geom.P(float64(a.rand.Intn(500)), float64(a.rand.Intn(500))),
 		Velocity: geom.Vec{X: x, Y: y},
 		Angle:    geom.NewRadian(float64(a.rand.Intn(360))),
 	}

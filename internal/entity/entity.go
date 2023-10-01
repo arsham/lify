@@ -24,6 +24,9 @@ const (
 	Died
 	// BoxBounded is an entity that has a box boundary.
 	BoxBounded
+	// Collides marks an entity that should be checked against other entities
+	// with the Collides or Rigid masks.
+	Collides
 )
 
 // An Entity is an element in the game that can have at least one component.

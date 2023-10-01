@@ -99,6 +99,7 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 		&system.BoundingBox{
 			Size: 1,
 		},
+		&system.Collision{},
 	)
 	g := &Engine{
 		title:        "Neuragene",
