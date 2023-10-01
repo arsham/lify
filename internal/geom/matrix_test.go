@@ -216,6 +216,7 @@ func TestMatrixResized(t *testing.T) {
 		tc := tc
 		name := fmt.Sprintf("case %d", i)
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			tc.m.Resize(tc.anchor, tc.size)
 			assert.True(t, tc.want.Eq(tc.m), "\nwant: %s\n got: %s", tc.want, tc.m)
 		})

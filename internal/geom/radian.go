@@ -33,6 +33,6 @@ func (r Radian) Sin() float64 {
 }
 
 // Sincos returns the Sine and Cosine of the r.
-func (r Radian) Sincos() (sin float64, cos float64) {
+func (r Radian) Sincos() (sin, cos float64) {
 	return math.Sincos(float64(r))
 }
