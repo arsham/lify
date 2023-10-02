@@ -30,6 +30,10 @@ asset:
   - internal/asset/*
   - internal/asset/**/*
 
+quadtree:
+  - internal/quadtree/*
+  - internal/quadtree/**/*
+
 build:
   - build/*
   - build/**/*

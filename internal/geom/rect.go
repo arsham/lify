@@ -126,3 +126,12 @@ func (r Rect) MinimumTranslationVector(other Rect) Vec {
 
 	return V(mtvX, mtvY)
 }
+
+// Contains returns true if the given vector is inside the Rect. Points on the
+// edge of the Rect are considered to be inside.
+func (r Rect) Contains(v Vec) bool {
+	return r.Min.X <= v.X &&
+		v.X <= r.Max.X &&
+		r.Min.Y <= v.Y &&
+		v.Y <= r.Max.Y
+}
