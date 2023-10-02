@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/arsham/neuragene/internal/component"
 	"github.com/arsham/neuragene/internal/entity"
@@ -11,8 +12,9 @@ import (
 // system before the AI system, otherwise the AI can't collect the dead genes.
 type Lifespan struct {
 	noDraw
-	entities   *entity.Manager
-	components *component.Manager
+	entities     *entity.Manager
+	components   *component.Manager
+	lastDuration time.Duration
 }
 
 func (l *Lifespan) String() string { return "Lifespan" }
@@ -34,6 +36,10 @@ func (l *Lifespan) setup(c controller) error {
 }
 
 func (l *Lifespan) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		l.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateRunning) {
 		return nil
 	}
@@ -53,4 +59,9 @@ func (l *Lifespan) update(state component.State) error {
 		}
 	})
 	return nil
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (l *Lifespan) avgCalc() time.Duration {
+	return l.lastDuration
 }

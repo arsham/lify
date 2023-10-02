@@ -3,6 +3,7 @@ package system
 import (
 	"image"
 	"image/color"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -18,6 +19,7 @@ type Grid struct {
 	lastWinBounds image.Point
 	GridSize      int
 	Size          float64
+	lastDuration  time.Duration
 }
 
 var _ System = (*Grid)(nil)
@@ -55,6 +57,10 @@ func (g *Grid) drawGrid(w, h int) {
 
 // update draws the grid on a cached canvas if the window size has changed.
 func (g *Grid) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		g.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateDrawGrids) {
 		return nil
 	}
@@ -74,4 +80,9 @@ func (g *Grid) draw(screen *ebiten.Image, state component.State) {
 		return
 	}
 	screen.DrawImage(g.canvas, nil)
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (g *Grid) avgCalc() time.Duration {
+	return g.lastDuration
 }

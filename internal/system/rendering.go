@@ -3,6 +3,7 @@ package system
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/colornames"
@@ -14,12 +15,13 @@ import (
 
 // Rendering system renders to the screen.
 type Rendering struct {
-	entities   *entity.Manager
-	assets     *asset.Manager
-	components *component.Manager
-	Title      string
-	Width      int32
-	Height     int32
+	entities     *entity.Manager
+	assets       *asset.Manager
+	components   *component.Manager
+	Title        string
+	lastDuration time.Duration
+	Width        int32
+	Height       int32
 }
 
 var _ System = (*Rendering)(nil)
@@ -48,6 +50,10 @@ func (*Rendering) update(component.State) error { return nil }
 
 // draw clears up the window and draws all entities on the screen.
 func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
+	started := time.Now()
+	defer func() {
+		r.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateDrawTextures) {
 		return
 	}
@@ -88,4 +94,9 @@ func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
 		img := assets[sprite.Name]
 		screen.DrawImage(img, options)
 	})
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (r *Rendering) avgCalc() time.Duration {
+	return r.lastDuration
 }

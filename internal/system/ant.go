@@ -3,6 +3,7 @@ package system
 import (
 	"fmt"
 	stdrand "math/rand"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -20,6 +21,7 @@ type Ant struct {
 	assets       *asset.Manager
 	sprite       *ebiten.Image
 	components   *component.Manager
+	lastDuration time.Duration
 	MinVelocity  float64
 	MaxVelocity  float64
 	Seed         int64
@@ -61,6 +63,10 @@ const antMask = entity.Positioned | entity.Lifespan | entity.BoxBounded | entity
 
 // update spawns an ant every 100 frames.
 func (a *Ant) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		a.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateSpawnAnts, component.StateRunning) {
 		return nil
 	}
@@ -107,4 +113,9 @@ func (a *Ant) spawnAnt() {
 	bounds := geom.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
 
 	a.components.BoundingBox[id] = &component.BoundingBox{Rect: bounds}
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (a *Ant) avgCalc() time.Duration {
+	return a.lastDuration
 }

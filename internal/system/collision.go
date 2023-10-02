@@ -13,8 +13,9 @@ import (
 // be undesirable.
 type Collision struct {
 	noDraw
-	entitties  *entity.Manager
-	components *component.Manager
+	entitties    *entity.Manager
+	components   *component.Manager
+	lastDuration time.Duration
 }
 
 var _ System = (*Collision)(nil)
@@ -35,6 +36,10 @@ func (c *Collision) setup(ct controller) error {
 }
 
 func (c *Collision) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		c.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateHandleCollisions, component.StateRunning) {
 		return nil
 	}
@@ -97,4 +102,9 @@ func (c *Collision) update(state component.State) error {
 		})
 	})
 	return nil
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (c *Collision) avgCalc() time.Duration {
+	return c.lastDuration
 }

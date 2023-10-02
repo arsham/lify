@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -14,9 +15,10 @@ import (
 // calculates the velocity and updates the position.
 type Position struct {
 	noDraw
-	entities   *entity.Manager
-	components *component.Manager
-	controller controller
+	entities     *entity.Manager
+	components   *component.Manager
+	controller   controller
+	lastDuration time.Duration
 }
 
 var _ System = (*Position)(nil)
@@ -39,6 +41,10 @@ func (p *Position) setup(c controller) error {
 
 // update moves the entities if their movement or velocity flags are set.
 func (p *Position) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		p.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateRunning) {
 		return nil
 	}
@@ -59,4 +65,9 @@ func (p *Position) update(state component.State) error {
 		position.BounceBy(container)
 	})
 	return nil
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (p *Position) avgCalc() time.Duration {
+	return p.lastDuration
 }
