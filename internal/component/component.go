@@ -123,4 +123,7 @@ const (
 	// StateHandleCollisions indicates that the system should check for
 	// collisions.
 	StateHandleCollisions
+	// StateDrawCollisionBoxes indicates that the system should draw the
+	// collision boxes.
+	StateDrawCollisionBoxes
 )

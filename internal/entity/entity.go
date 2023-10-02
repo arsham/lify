@@ -27,6 +27,9 @@ const (
 	// Collides marks an entity that should be checked against other entities
 	// with the Collides or Rigid masks.
 	Collides
+	// Rigid marks the entity that should cause other entities with Collides
+	// mask to be bounced, but it is not be resolved in terms of collisions.
+	Rigid
 )
 
 // An Entity is an element in the game that can have at least one component.
