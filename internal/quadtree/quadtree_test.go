@@ -145,3 +145,19 @@ func BenchmarkQuery(b *testing.B) {
 		q.Query(geom.R(0, 0, 100, 100), result)
 	}
 }
+
+func BenchmarkQuadTree(b *testing.B) {
+	maxX, maxY := 1000, 1000
+	bounds := &quadtree.Bounds{Rect: geom.R(0, 0, float64(maxX), float64(maxY))}
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		q := quadtree.NewQuadTree[uint64](bounds, 10, 0)
+		for i := 0; i < maxX; i++ {
+			for j := 0; j < maxY; j++ {
+				q.Insert(quadtree.P[uint64](1, geom.V(float64(i), float64(j))))
+			}
+		}
+		q.Free()
+	}
+}
