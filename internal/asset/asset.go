@@ -20,6 +20,7 @@ type Name int
 // These are asset names.
 const (
 	Ant Name = iota + 1
+	FruitApple
 )
 
 // Manager holds the assets for rendering.
@@ -41,6 +42,15 @@ func New(filesystem fs.FS) (*Manager, error) {
 		return nil, fmt.Errorf("loading asset: %w", err)
 	}
 	a.sprites[Ant] = antPic
+
+	fruitSheet, _, err := ebitenutil.NewImageFromFileSystem(a.fs, filepath.Join("assets", "images", "food", "fruits.png"))
+	if err != nil {
+		return nil, fmt.Errorf("loading asset: %w", err)
+	}
+
+	fruits := splitSpriteSheetImages(fruitSheet, 1, 16, 16)
+
+	a.sprites[FruitApple] = fruits[0]
 
 	return a, nil
 }
