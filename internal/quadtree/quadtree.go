@@ -29,6 +29,14 @@ type Point[T any] struct {
 	geom.Vec
 }
 
+// P creates a new Point object from the given data and vector.
+func P[T any](data T, v geom.Vec) Point[T] {
+	return Point[T]{
+		Data: data,
+		Vec:  v,
+	}
+}
+
 func (p Point[T]) String() string {
 	return fmt.Sprintf("Point(x: %.1f, y: %.1f, data: %v)", p.X, p.Y, p.Data)
 }
