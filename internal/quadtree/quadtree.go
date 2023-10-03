@@ -1,3 +1,5 @@
+// Package quadtree implements a quadtree datastructure for storing points in a
+// 2D space for fast lookup.
 package quadtree
 
 import (

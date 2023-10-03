@@ -28,8 +28,8 @@ type Stats struct {
 	entities     *entity.Manager
 	controller   controller
 	updateTime   time.Time
-	reports      []reports
 	stats        map[string]time.Duration
+	reports      []reports
 	dt           time.Duration
 	filterTime   time.Duration
 	lastDuration time.Duration
