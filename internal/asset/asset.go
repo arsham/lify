@@ -3,6 +3,7 @@ package asset
 
 import (
 	"fmt"
+	"image"
 	_ "image/png" // This is needed for decoding png files.
 	"io/fs"
 	"path/filepath"
@@ -42,6 +43,19 @@ func New(filesystem fs.FS) (*Manager, error) {
 	a.sprites[Ant] = antPic
 
 	return a, nil
+}
+
+// LoadSpritesheet returns n sub images from the given input image.
+func splitSpriteSheetImages(spritesheet *ebiten.Image, n, width, height int) []*ebiten.Image {
+	sprites := []*ebiten.Image{}
+
+	for i := 0; i < n; i++ {
+		dimensions := image.Rect(i*width, 0, (i+1)*width, height)
+		sprite := ebiten.NewImageFromImage(spritesheet.SubImage(dimensions))
+		sprites = append(sprites, sprite)
+	}
+
+	return sprites
 }
 
 // Sprites returns the map of sprites.
