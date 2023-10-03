@@ -120,9 +120,11 @@ func (c *Collision) entityCollisions(_ int, e *entity.Entity) {
 	x, y := pos1.Pos.Resolve().XY()
 	bounds := geom.R(x-bb1W, y-bb1H, x+bb1W, y+bb1H)
 
-	points := c.qTree.Query(bounds)
-	for i := range points {
-		id2 := points[i].Data
+	points := quadtree.Q[uint64]()
+	defer points.Free()
+	c.qTree.Query(bounds, points)
+	for i := range points.Points {
+		id2 := points.Points[i].Data
 		if id1 == id2 {
 			return
 		}

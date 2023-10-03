@@ -123,3 +123,25 @@ func TestBoundsSubDivide(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkQuery(b *testing.B) {
+	maxX, maxY := 1000, 1000
+	bounds := &quadtree.Bounds{Rect: geom.R(0, 0, float64(maxX), float64(maxY))}
+	q := quadtree.NewQuadTree[uint64](bounds, 10, 0)
+	for i := 0; i < maxX; i++ {
+		for j := 0; j < maxY; j++ {
+			q.Insert(quadtree.P[uint64](1, geom.V(float64(i), float64(j))))
+			q.Insert(quadtree.P[uint64](1, geom.V(float64(i), float64(j))))
+			q.Insert(quadtree.P[uint64](1, geom.V(float64(i), float64(j))))
+			q.Insert(quadtree.P[uint64](1, geom.V(float64(i), float64(j))))
+			q.Insert(quadtree.P[uint64](1, geom.V(float64(i), float64(j))))
+		}
+	}
+	b.ResetTimer()
+	b.ReportAllocs()
+	result := quadtree.Q[uint64]()
+	for i := 0; i < b.N; i++ {
+		result.Free()
+		q.Query(geom.R(0, 0, 100, 100), result)
+	}
+}

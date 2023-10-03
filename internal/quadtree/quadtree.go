@@ -5,6 +5,7 @@ package quadtree
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/arsham/neuragene/internal/geom"
 )
@@ -208,28 +209,49 @@ func (q *QuadTree[T]) Insert(p Point[T]) {
 	q.se.Insert(p)
 }
 
+var queryResultPool = sync.Pool{
+	New: func() interface{} {
+		return &QueryResult[uint64]{
+			Points: make([]Point[uint64], 0, 1000),
+		}
+	},
+}
+
+// QueryResult is a result of a query.
+type QueryResult[T any] struct {
+	Points []Point[T]
+}
+
+// Free returns the QueryResult to the pool.
+func (q *QueryResult[T]) Free() {
+	q.Points = q.Points[:0]
+	queryResultPool.Put(q)
+}
+
+// Q returns a new QueryResult object from a pool of QueryResult objects.
+func Q[T any]() *QueryResult[T] {
+	// nolint:forcetypeassert // we already know the type.
+	return queryResultPool.Get().(*QueryResult[T])
+}
+
 // Query returns all points within the bounds.
-func (q *QuadTree[T]) Query(rect geom.Rect) []Point[T] {
+func (q *QuadTree[T]) Query(rect geom.Rect, result *QueryResult[T]) {
 	if !q.boundary.Intersects(rect) {
-		return nil
+		return
 	}
-	// we might need to increase the capacity of the slice by the number of
-	// children.
-	points := make([]Point[T], 0, len(q.points))
 	if q.divided {
-		points = append(points, q.nw.Query(rect)...)
-		points = append(points, q.ne.Query(rect)...)
-		points = append(points, q.sw.Query(rect)...)
-		points = append(points, q.se.Query(rect)...)
-		return points
+		q.nw.Query(rect, result)
+		q.ne.Query(rect, result)
+		q.sw.Query(rect, result)
+		q.se.Query(rect, result)
+		return
 	}
 
 	for _, p := range q.points {
 		if rect.Contains(p.Vec) {
-			points = append(points, p)
+			result.Points = append(result.Points, p)
 		}
 	}
-	return points
 }
 
 // Bounds returns the top left x and y, and bottom right x and y.
