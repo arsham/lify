@@ -93,6 +93,7 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 			Seed:         1,
 			MutationRate: 100,
 		},
+		&system.Food{},
 		&system.Position{},
 		&system.Lifespan{},
 		&system.Stats{},
