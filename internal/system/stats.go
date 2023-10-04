@@ -25,16 +25,16 @@ type reports interface {
 
 // Stats prints useful statistics every 2 seconds.
 type Stats struct {
-	entities     *entity.Manager
-	controller   controller
-	updateTime   time.Time
-	stats        map[string]time.Duration
-	reports      []reports
-	dt           time.Duration
-	filterTime   time.Duration
-	lastDuration time.Duration
-	frameCount   uint64
-	fps          uint64
+	entities           *entity.Manager
+	controller         controller
+	updateTime         time.Time
+	stats              map[string]time.Duration
+	reports            []reports
+	lastUpdateDuration time.Duration
+	lastDrawDuration   time.Duration
+	filterTime         time.Duration
+	lastDuration       time.Duration
+	frameCount         uint64
 }
 
 var _ System = (*Stats)(nil)
@@ -66,18 +66,17 @@ func (s *Stats) update(state component.State) error {
 		return nil
 	}
 	s.frameCount++
-	s.fps++
 	for _, r := range s.reports {
 		s.stats[r.String()] += r.avgCalc()
 	}
 	if time.Since(s.updateTime) >= time.Second*2 {
-		s.dt = s.controller.LastFrameDuration()
+		s.lastUpdateDuration = s.controller.LastUpdateDuration()
+		s.lastDrawDuration = s.controller.LastDrawDuration()
 		t1 := time.Now()
 		s.entities.MapByMask(0b111111, func(*entity.Entity) {})
 		s.printStats()
 		s.filterTime = time.Since(t1)
 		s.updateTime = time.Now()
-		s.fps = 0
 		clear(s.stats)
 	}
 	return nil
@@ -101,9 +100,11 @@ func (s *Stats) printEngineStats() {
 	_, _ = tm.Println(format("Engine Statistics:", ""))
 	_, _ = tm.Println(format("Entities:", fmt.Sprintf("%d", s.entities.Len())))
 	_, _ = tm.Println(format("FilterTime:", s.filterTime.String()))
-	_, _ = tm.Println(format("FrameTime:", s.dt.String()))
+	_, _ = tm.Println(format("DrawTime:", s.lastDrawDuration.String()))
+	_, _ = tm.Println(format("UpdateTime:", s.lastUpdateDuration.String()))
 	_, _ = tm.Println(format("Total Frames:", fmt.Sprintf("%d", s.frameCount)))
-	_, _ = tm.Println(format("FPS:", fmt.Sprintf("%d", s.fps/2)))
+	_, _ = tm.Println(format("ActualFPS:", fmt.Sprintf("%.2f", ebiten.ActualFPS())))
+	_, _ = tm.Println(format("ActualTPS:", fmt.Sprintf("%.2f", ebiten.ActualTPS())))
 	_, _ = tm.Println(strings.Repeat("-", 47))
 }
 
@@ -163,14 +164,17 @@ func (s *Stats) printSystemStats() {
 		dur  time.Duration
 	}
 	values := make([]value, 0, len(s.stats))
+	tps := ebiten.ActualTPS()
 	for name, avg := range s.stats {
-		avg /= time.Duration(s.fps)
+		avg /= time.Duration(tps)
 		total += avg
 		values = append(values, value{name, avg})
 	}
 	slices.SortFunc(values, func(a, b value) int {
 		return cmp.Compare(a.name, b.name)
 	})
+
+	_, _ = tm.Println(format("System Statistics:", ""))
 	for _, t := range values {
 		_, _ = tm.Println(format(t.name, t.dur.String()))
 	}

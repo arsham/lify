@@ -25,8 +25,10 @@ type controller interface {
 	ComponentManager() *component.Manager
 	// AssetManager returns the asset manager.
 	AssetManager() *asset.Manager
-	// LastFrameDuration returns the time it took to execute the last frame.
-	LastFrameDuration() time.Duration
+	// LastDrawDuration returns the time it took to execute the last draw.
+	LastDrawDuration() time.Duration
+	// LastUpdateDuration returns the time it took to execute the last update.
+	LastUpdateDuration() time.Duration
 }
 
 // A System should implement this interface.
