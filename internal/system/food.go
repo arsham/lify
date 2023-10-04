@@ -37,11 +37,15 @@ func (a *Food) setup(c controller) error {
 	if a.components == nil {
 		return fmt.Errorf("%w: component manager", ErrInvalidArgument)
 	}
-	a.sprite = a.assets.Sprites()[asset.FruitApple]
+	sprite := a.assets.Sprites()[asset.FruitApple]
+	if sprite == nil {
+		return fmt.Errorf("%w: sprites", ErrNotFound)
+	}
+	a.sprite = sprite
 	return nil
 }
 
-// update spawns an ant every 100 frames.
+// update will spawn food at the cursor position.
 func (a *Food) update(state component.State) error {
 	if !all(state, component.StateSpawnAnts, component.StateRunning) {
 		return nil
