@@ -99,7 +99,12 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 		&system.BoundingBox{
 			Size: 1,
 		},
-		&system.Collision{},
+		&system.Collision{
+			Capacity: 20,
+		},
+		&system.Quadtree{
+			Capacity: 20,
+		},
 	)
 	g := &Engine{
 		title:        "Neuragene",

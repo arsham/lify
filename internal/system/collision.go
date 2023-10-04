@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/colornames"
 
 	"github.com/arsham/neuragene/internal/component"
@@ -21,6 +20,7 @@ import (
 // system should be set after the BoundingBox system otherwise the effects will
 // be undesirable.
 type Collision struct {
+	noDraw
 	entitties    *entity.Manager
 	components   *component.Manager
 	qTree        *quadtree.QuadTree[uint64]
@@ -48,7 +48,7 @@ func (c *Collision) setup(ct controller) error {
 		c.Colour = colornames.Red
 	}
 	if c.Capacity == 0 {
-		c.Capacity = 10
+		c.Capacity = 20
 	}
 	if c.Workers == 0 {
 		c.Workers = uint(runtime.NumCPU())
@@ -172,27 +172,7 @@ func (c *Collision) entityCollisions(e *entity.Entity) {
 	}
 }
 
-func (c *Collision) drawChildren(t *quadtree.QuadTree[uint64], canvas *ebiten.Image) {
-	for _, child := range t.Children() {
-		if child == nil {
-			continue
-		}
-		x1, y1, x2, y2 := child.Bounds()
-		vector.StrokeRect(canvas, float32(x1), float32(y1), float32(x2-x1), float32(y2-y1), 1, c.Colour, false)
-		c.drawChildren(child, canvas)
-	}
-}
-
 // avgCalc returns the amount of time it took for the last update.
 func (c *Collision) avgCalc() time.Duration {
 	return c.lastDuration
-}
-
-func (c *Collision) draw(screen *ebiten.Image, state component.State) {
-	if !all(state, component.StateDrawCollisionBoxes) {
-		return
-	}
-	canvas := ebiten.NewImage(ebiten.WindowSize())
-	c.drawChildren(c.qTree, canvas)
-	screen.DrawImage(canvas, nil)
 }
