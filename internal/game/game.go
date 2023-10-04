@@ -128,8 +128,6 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 // Update updates a game by one tick. The given argument represents a screen
 // image.
 func (e *Engine) Update() error {
-	// TODO: move this to the stats system, or even completely ignore it and
-	// show these on the HUD.
 	select {
 	case <-e.second.C:
 		ebiten.SetWindowTitle(fmt.Sprintf("%s | FPS: %.2f", e.title, ebiten.ActualTPS()))
