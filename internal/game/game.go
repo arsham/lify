@@ -145,7 +145,6 @@ func (e *Engine) Update() error {
 // Draw draws the game screen onto the screen.
 func (e *Engine) Draw(screen *ebiten.Image) {
 	started := time.Now()
-	screen.Clear()
 	screen.Fill(colornames.Whitesmoke)
 	e.scene().Draw(screen)
 	e.lastDrawDuration = time.Since(started)
