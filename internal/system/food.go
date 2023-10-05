@@ -47,7 +47,7 @@ func (a *Food) setup(c controller) error {
 
 // update will spawn food at the cursor position.
 func (a *Food) update(state component.State) error {
-	if !all(state, component.StateSpawnAnts, component.StateRunning) {
+	if !all(state, component.StateSpawnFood, component.StateRunning) {
 		return nil
 	}
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) {
