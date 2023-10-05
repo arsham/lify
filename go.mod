@@ -4,14 +4,15 @@ go 1.21.1
 
 require (
 	github.com/alecthomas/assert/v2 v2.4.0
-	github.com/buger/goterm v1.0.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/hajimehoshi/ebiten/v2 v2.6.1
 	github.com/kkyr/fig v0.3.2
 	github.com/magefile/mage v1.15.0
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/profile v1.7.0
 	golang.org/x/image v0.12.0
+	golang.org/x/term v0.5.0
 	gonum.org/v1/gonum v0.14.0
 )
 
@@ -23,6 +24,7 @@ require (
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/jezek/xgb v1.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
