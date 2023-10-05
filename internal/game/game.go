@@ -44,8 +44,10 @@ type Engine struct {
 	second *time.Ticker
 	// title is the title of the window.
 	title string
-	// lastFrameDuration is the duration of the previous frame.
-	lastFrameDuration time.Duration
+	// lastUpdateDuration is the duration of the previous update.
+	lastUpdateDuration time.Duration
+	// lastDrawDuration is the duration of the previous draw.
+	lastDrawDuration time.Duration
 	// currentScene is the currently playing scene.
 	currentScene scene.Type
 }
@@ -99,7 +101,12 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 		&system.BoundingBox{
 			Size: 1,
 		},
-		&system.Collision{},
+		&system.Collision{
+			Capacity: 20,
+		},
+		&system.Quadtree{
+			Capacity: 20,
+		},
 	)
 	g := &Engine{
 		title:        "Neuragene",
@@ -123,11 +130,13 @@ func NewEngine(env *config.Env, filesystem fs.FS) (*Engine, error) {
 // Update updates a game by one tick. The given argument represents a screen
 // image.
 func (e *Engine) Update() error {
-	// TODO: move this to the stats system, or even completely ignore it and
-	// show these on the HUD.
+	started := time.Now()
+	defer func() {
+		e.lastUpdateDuration = time.Since(started)
+	}()
 	select {
 	case <-e.second.C:
-		ebiten.SetWindowTitle(fmt.Sprintf("%s | FPS: %.2f", e.title, ebiten.ActualTPS()))
+		ebiten.SetWindowTitle(fmt.Sprintf("%s | FPS: %.2f | TPS: %.2f", e.title, ebiten.ActualFPS(), ebiten.ActualTPS()))
 	default:
 	}
 	return e.scene().Update()
@@ -136,10 +145,9 @@ func (e *Engine) Update() error {
 // Draw draws the game screen onto the screen.
 func (e *Engine) Draw(screen *ebiten.Image) {
 	started := time.Now()
-	screen.Clear()
 	screen.Fill(colornames.Whitesmoke)
 	e.scene().Draw(screen)
-	e.lastFrameDuration = time.Since(started)
+	e.lastDrawDuration = time.Since(started)
 }
 
 // Layout accepts a native outside size in device-independent pixels and
@@ -173,7 +181,12 @@ func (e *Engine) AssetManager() *asset.Manager {
 	return e.assets
 }
 
-// LastFrameDuration returns the time it took to process previous frame.
-func (e *Engine) LastFrameDuration() time.Duration {
-	return e.lastFrameDuration
+// LastDrawDuration returns the time it took to process previous draw.
+func (e *Engine) LastDrawDuration() time.Duration {
+	return e.lastDrawDuration
+}
+
+// LastUpdateDuration returns the time it took to process previous update.
+func (e *Engine) LastUpdateDuration() time.Duration {
+	return e.lastUpdateDuration
 }

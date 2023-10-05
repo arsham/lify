@@ -5,6 +5,7 @@ package quadtree
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/arsham/neuragene/internal/geom"
 )
@@ -29,6 +30,14 @@ type Point[T any] struct {
 	geom.Vec
 }
 
+// P creates a new Point object from the given data and vector.
+func P[T any](data T, v geom.Vec) Point[T] {
+	return Point[T]{
+		Data: data,
+		Vec:  v,
+	}
+}
+
 func (p Point[T]) String() string {
 	return fmt.Sprintf("Point(x: %.1f, y: %.1f, data: %v)", p.X, p.Y, p.Data)
 }
@@ -39,16 +48,28 @@ type Bounds struct {
 	geom.Rect
 }
 
+var boundsPool = sync.Pool{
+	New: func() interface{} {
+		return &Bounds{}
+	},
+}
+
 // NewBounds creates a new Bounds object. The x1 and y1 are the coordinates of
 // the top left corner of the bounds, and the x2 and y2 are the coordinates of
 // the bottom right corner of the bounds.
 func NewBounds(x1, y1, x2, y2 float64) *Bounds {
-	return &Bounds{
-		Rect: geom.Rect{
-			Min: geom.V(x1, y1),
-			Max: geom.V(x2, y2),
-		},
-	}
+	// nolint:forcetypeassert // we already know the type.
+	b := boundsPool.Get().(*Bounds)
+	b.Min.X = x1
+	b.Min.Y = y1
+	b.Max.X = x2
+	b.Max.Y = y2
+	return b
+}
+
+// Free returns the Bounds to the pool.
+func (b *Bounds) Free() {
+	boundsPool.Put(b)
 }
 
 // Contains returns true if the point is within the bounds. If the point is
@@ -101,6 +122,14 @@ func (b *Bounds) SubDivide(q quadrant) *Bounds {
 	panic(fmt.Sprintf("invalid quadrant: %d", q))
 }
 
+var quadTreePool = sync.Pool{
+	New: func() interface{} {
+		return &QuadTree[uint64]{
+			points: make([]Point[uint64], 0, 1),
+		}
+	},
+}
+
 // QuadTree holds a series of points in a quadtree structure. If might contain
 // four children, and each child might contain four children, and so on. The
 // top level quadtree is the root node. When the number of points in a node
@@ -122,12 +151,37 @@ type QuadTree[T any] struct {
 // NewQuadTree creates a new QuadTree object with the given boundary and
 // maximum capacity for each quadrant.
 func NewQuadTree[T any](b *Bounds, capacity uint, depth uint8) *QuadTree[T] {
-	return &QuadTree[T]{
-		boundary: b,
-		points:   make([]Point[T], 0, capacity),
-		capacity: capacity,
-		depth:    depth,
+	// nolint:forcetypeassert // we already know the type.
+	q := quadTreePool.Get().(*QuadTree[T])
+	q.boundary = b
+	q.capacity = capacity
+	q.depth = depth
+	return q
+}
+
+// Free returns the QuadTree to the pool.
+func (q *QuadTree[T]) Free() {
+	if q.nw != nil {
+		q.nw.Free()
+		q.nw = nil
 	}
+	if q.ne != nil {
+		q.ne.Free()
+		q.ne = nil
+	}
+	if q.sw != nil {
+		q.sw.Free()
+		q.sw = nil
+	}
+	if q.se != nil {
+		q.se.Free()
+		q.se = nil
+	}
+	q.points = q.points[:0]
+	q.depth = 0
+	q.divided = false
+	q.boundary.Free()
+	quadTreePool.Put(q)
 }
 
 // Children returns the children of the quadtree node. It returns nil if this
@@ -200,28 +254,49 @@ func (q *QuadTree[T]) Insert(p Point[T]) {
 	q.se.Insert(p)
 }
 
+var queryResultPool = sync.Pool{
+	New: func() interface{} {
+		return &QueryResult[uint64]{
+			Points: make([]Point[uint64], 0, 1000),
+		}
+	},
+}
+
+// QueryResult is a result of a query.
+type QueryResult[T any] struct {
+	Points []Point[T]
+}
+
+// Free returns the QueryResult to the pool.
+func (q *QueryResult[T]) Free() {
+	q.Points = q.Points[:0]
+	queryResultPool.Put(q)
+}
+
+// Q returns a new QueryResult object from a pool of QueryResult objects.
+func Q[T any]() *QueryResult[T] {
+	// nolint:forcetypeassert // we already know the type.
+	return queryResultPool.Get().(*QueryResult[T])
+}
+
 // Query returns all points within the bounds.
-func (q *QuadTree[T]) Query(rect geom.Rect) []Point[T] {
+func (q *QuadTree[T]) Query(rect geom.Rect, result *QueryResult[T]) {
 	if !q.boundary.Intersects(rect) {
-		return nil
+		return
 	}
-	// we might need to increase the capacity of the slice by the number of
-	// children.
-	points := make([]Point[T], 0, len(q.points))
 	if q.divided {
-		points = append(points, q.nw.Query(rect)...)
-		points = append(points, q.ne.Query(rect)...)
-		points = append(points, q.sw.Query(rect)...)
-		points = append(points, q.se.Query(rect)...)
-		return points
+		q.nw.Query(rect, result)
+		q.ne.Query(rect, result)
+		q.sw.Query(rect, result)
+		q.se.Query(rect, result)
+		return
 	}
 
 	for _, p := range q.points {
 		if rect.Contains(p.Vec) {
-			points = append(points, p)
+			result.Points = append(result.Points, p)
 		}
 	}
-	return points
 }
 
 // Bounds returns the top left x and y, and bottom right x and y.

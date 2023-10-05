@@ -95,6 +95,15 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go }}
+
       - name: Install dependencies
         if: runner.os == 'Linux'
         run: |
@@ -121,6 +130,12 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Install dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install -y libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev xvfb gcc
 
       - name: Set up Go ${{ matrix.go }}
         uses: actions/setup-go@v4

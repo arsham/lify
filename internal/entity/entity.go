@@ -78,9 +78,6 @@ func (m *Manager) NewEntity(mask Mask) *Entity {
 		mask: mask,
 	}
 	m.toAdd = append(m.toAdd, e)
-	if mask&Positioned == Positioned {
-		m.components.Position[e.ID] = &component.Position{}
-	}
 	return e
 }
 
