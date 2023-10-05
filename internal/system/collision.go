@@ -70,9 +70,7 @@ func (c *Collision) update(state component.State) error {
 	bounds := quadtree.NewBounds(0, 0, float64(maxX), float64(maxY))
 	c.qTree = quadtree.NewQuadTree[uint64](bounds, c.Capacity, 0)
 	defer c.qTree.Free()
-	count := 0
 	c.entitties.MapByMask(entity.Collides|entity.Rigid, func(e *entity.Entity) {
-		count++
 		id := e.ID
 		pos := positions[id]
 		point := quadtree.P(
@@ -86,6 +84,7 @@ func (c *Collision) update(state component.State) error {
 	})
 
 	var wg sync.WaitGroup
+	count := c.entitties.Len()
 	checkCh := make(chan *entity.Entity, count)
 	wg.Add(int(c.Workers))
 	for i := 0; i < int(c.Workers); i++ {
