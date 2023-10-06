@@ -1,34 +1,42 @@
 game:
-  - game/*
-  - game/**/*
+  - internal/game/*
+  - internal/game/**/*
 
 config:
   - internal/config/*
   - internal/config/**/*
 
 component:
-  - component/
-  - component/**/*
+  - internal/component/
+  - internal/component/**/*
 
 entity:
-  - entity/
-  - entity/**/*
+  - internal/entity/
+  - internal/entity/**/*
 
 system:
-  - system/
-  - system/**/*
+  - internal/system/
+  - internal/system/**/*
 
 scene:
-  - scene/
-  - scene/**/*
-
-build:
-  - build/*
-  - build/**/*
+  - internal/scene/
+  - internal/scene/**/*
 
 ai:
   - internal/brain/*
   - internal/brain/**/*
+
+asset:
+  - internal/asset/*
+  - internal/asset/**/*
+
+quadtree:
+  - internal/quadtree/*
+  - internal/quadtree/**/*
+
+build:
+  - build/*
+  - build/**/*
 
 ci:
   - .github/*

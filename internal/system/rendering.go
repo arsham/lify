@@ -3,6 +3,7 @@ package system
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/colornames"
@@ -14,12 +15,13 @@ import (
 
 // Rendering system renders to the screen.
 type Rendering struct {
-	entities   *entity.Manager
-	assets     *asset.Manager
-	components *component.Manager
-	Title      string
-	Width      int32
-	Height     int32
+	entities     *entity.Manager
+	assets       *asset.Manager
+	components   *component.Manager
+	Title        string
+	lastDuration time.Duration
+	Width        int32
+	Height       int32
 }
 
 var _ System = (*Rendering)(nil)
@@ -48,20 +50,24 @@ func (*Rendering) update(component.State) error { return nil }
 
 // draw clears up the window and draws all entities on the screen.
 func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
+	started := time.Now()
+	defer func() {
+		r.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateDrawTextures) {
 		return
 	}
-	sprites := r.assets.Sprites()
-	spriteMap := r.components.Sprite
-	posMap := r.components.Position
-	colMap := r.components.Collision
+	assets := r.assets.Sprites()
+	sprites := r.components.Sprite
+	positions := r.components.Position
+	boundingBoxes := r.components.BoundingBox
 	r.entities.MapByMask(entity.Positioned|entity.HasTexture, func(e *entity.Entity) {
-		sprite := spriteMap[e.ID]
-		position := posMap[e.ID]
-		collision := colMap[e.ID]
+		sprite := sprites[e.ID]
+		position := positions[e.ID]
+		boundingBox := boundingBoxes[e.ID]
 		options := &ebiten.DrawImageOptions{}
 
-		r := collision.Rect
+		r := boundingBox.Rect
 		// Move the centre point to the top left corner so the rotation doesn't
 		// look wonky.
 		options.GeoM.Translate(-r.W()/2, -r.H()/2)
@@ -85,7 +91,12 @@ func (r *Rendering) draw(screen *ebiten.Image, state component.State) {
 		options.GeoM.Translate(position.Vec().XY())
 		options.ColorScale.ScaleWithColor(colornames.Red)
 
-		img := sprites[sprite.Name]
+		img := assets[sprite.Name]
 		screen.DrawImage(img, options)
 	})
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (r *Rendering) avgCalc() time.Duration {
+	return r.lastDuration
 }

@@ -40,10 +40,13 @@ type System interface {
 	draw(screen *ebiten.Image, state component.State)
 	// String returns the name of the system.
 	String() string
+	// avgCalc returns the amount of time it took for the last update.
+	avgCalc() time.Duration
 }
 
 // Manager holds a series of Systems.
 type Manager struct {
+	stats   *Stats
 	systems []System
 }
 
@@ -69,6 +72,13 @@ func (m *Manager) Setup(c controller) error {
 		if err := s.setup(c); err != nil {
 			return fmt.Errorf("setting up %s system: %w", s, err)
 		}
+		v, ok := s.(*Stats)
+		if ok {
+			m.stats = v
+		}
+	}
+	for _, s := range m.systems {
+		m.stats.reports = append(m.stats.reports, s)
 	}
 	return nil
 }
@@ -100,3 +110,7 @@ func all(state component.State, flags ...component.State) bool {
 	}
 	return true
 }
+
+type noDraw struct{}
+
+func (noDraw) draw(*ebiten.Image, component.State) {}

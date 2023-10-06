@@ -3,6 +3,7 @@ package system
 import (
 	"fmt"
 	stdrand "math/rand"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -14,11 +15,13 @@ import (
 
 // Ant spawns ants when required.
 type Ant struct {
+	noDraw
 	rand         *stdrand.Rand
 	entities     *entity.Manager
 	assets       *asset.Manager
 	sprite       *ebiten.Image
 	components   *component.Manager
+	lastDuration time.Duration
 	MinVelocity  float64
 	MaxVelocity  float64
 	Seed         int64
@@ -56,10 +59,14 @@ func (a *Ant) setup(c controller) error {
 	return nil
 }
 
-const antMask = entity.Positioned | entity.Lifespan | entity.BoxBounded
+const antMask = entity.Positioned | entity.Lifespan | entity.BoxBounded | entity.Collides
 
 // update spawns an ant every 100 frames.
 func (a *Ant) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		a.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateSpawnAnts, component.StateRunning) {
 		return nil
 	}
@@ -90,7 +97,7 @@ func (a *Ant) spawnAnt() {
 	id := ant.ID
 	a.components.Position[id] = &component.Position{
 		Scale:    scale,
-		Pos:      geom.P(500, 500),
+		Pos:      geom.P(float64(a.rand.Intn(500)), float64(a.rand.Intn(500))),
 		Velocity: geom.Vec{X: x, Y: y},
 		Angle:    geom.NewRadian(float64(a.rand.Intn(360))),
 	}
@@ -105,7 +112,10 @@ func (a *Ant) spawnAnt() {
 	b := a.sprite.Bounds()
 	bounds := geom.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
 
-	a.components.Collision[id] = &component.Collision{Rect: bounds}
+	a.components.BoundingBox[id] = &component.BoundingBox{Rect: bounds}
 }
 
-func (*Ant) draw(*ebiten.Image, component.State) {}
+// avgCalc returns the amount of time it took for the last update.
+func (a *Ant) avgCalc() time.Duration {
+	return a.lastDuration
+}

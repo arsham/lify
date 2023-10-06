@@ -28,6 +28,7 @@ func NewPlay(c controller) *Play {
 				component.StatePrintStats |
 				component.StateLimitLifespans |
 				component.StateDrawTextures |
+				component.StateHandleCollisions |
 				component.StateMoveEntities,
 		},
 	}
@@ -40,6 +41,8 @@ func NewPlay(c controller) *Play {
 	p.registerAction(ebiten.KeyB, action.ToggleBoundingBoxes)
 	p.registerAction(ebiten.KeySpace, action.Pause)
 	p.registerAction(ebiten.KeyT, action.ToggleTextures)
+	p.registerAction(ebiten.KeyC, action.ToggleCollisions)
+	p.registerAction(ebiten.KeyD, action.ToggleCollisionBoxes)
 	return p
 }
 
@@ -82,6 +85,10 @@ func (p *Play) actOn(a action.Action) {
 			p.state ^= component.StateRunning
 		case action.ToggleTextures:
 			p.state ^= component.StateDrawTextures
+		case action.ToggleCollisions:
+			p.state ^= component.StateHandleCollisions
+		case action.ToggleCollisionBoxes:
+			p.state ^= component.StateDrawCollisionBoxes
 		}
 	}
 }
