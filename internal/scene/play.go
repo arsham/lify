@@ -28,7 +28,8 @@ func NewPlay(c controller) *Play {
 				component.StatePrintStats |
 				component.StateLimitLifespans |
 				component.StateDrawTextures |
-				component.StateMoveEntities,
+				component.StateMoveEntities |
+				component.StateSpawnFood,
 		},
 	}
 	p.actOnFn = p.actOn
@@ -40,6 +41,7 @@ func NewPlay(c controller) *Play {
 	p.registerAction(ebiten.KeyB, action.ToggleBoundingBoxes)
 	p.registerAction(ebiten.KeySpace, action.Pause)
 	p.registerAction(ebiten.KeyT, action.ToggleTextures)
+	p.registerAction(ebiten.Key(ebiten.MouseButtonLeft), action.DropFood)
 	return p
 }
 
@@ -64,7 +66,7 @@ func (p *Play) Draw(screen *ebiten.Image) {
 	p.systems.Draw(screen, p.state)
 }
 
-// Do applies the action on the scene state.
+// actOn applies the action on the scene state.
 func (p *Play) actOn(a action.Action) {
 	if a.Phase == action.PhaseStart {
 		switch a.Name {
@@ -82,6 +84,8 @@ func (p *Play) actOn(a action.Action) {
 			p.state ^= component.StateRunning
 		case action.ToggleTextures:
 			p.state ^= component.StateDrawTextures
+		case action.DropFood:
+			p.state ^= component.StateSpawnFood
 		}
 	}
 }
