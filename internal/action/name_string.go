@@ -15,11 +15,12 @@ func _() {
 	_ = x[ToggleBoundingBoxes-5]
 	_ = x[Pause-6]
 	_ = x[ToggleTextures-7]
+	_ = x[DropFood-8]
 }
 
-const _Name_name = "QuitToggleGridToggleLimitFPSToggleLimitLifespansToggleBoundingBoxesPauseToggleTextures"
+const _Name_name = "QuitToggleGridToggleLimitFPSToggleLimitLifespansToggleBoundingBoxesPauseToggleTexturesDropFood"
 
-var _Name_index = [...]uint8{0, 4, 14, 28, 48, 67, 72, 86}
+var _Name_index = [...]uint8{0, 4, 14, 28, 48, 67, 72, 86, 94}
 
 func (i Name) String() string {
 	i -= 1

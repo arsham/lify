@@ -46,6 +46,8 @@ const (
 	// ToggleTextures toggles drawing of renderable textures. This has no
 	// effect on drawing bounding boxes.
 	ToggleTextures
+	// DropFood on mouse cursor location.
+	DropFood
 )
 
 // An Action is an input state that would result in an activity in a scene.
