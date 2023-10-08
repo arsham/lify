@@ -2,8 +2,7 @@ package system
 
 import (
 	"fmt"
-
-	"github.com/hajimehoshi/ebiten/v2"
+	"time"
 
 	"github.com/arsham/neuragene/internal/component"
 	"github.com/arsham/neuragene/internal/entity"
@@ -12,8 +11,10 @@ import (
 // Lifespan system handles the lifespan of entities. You should always use this
 // system before the AI system, otherwise the AI can't collect the dead genes.
 type Lifespan struct {
-	entities   *entity.Manager
-	components *component.Manager
+	noDraw
+	entities     *entity.Manager
+	components   *component.Manager
+	lastDuration time.Duration
 }
 
 func (l *Lifespan) String() string { return "Lifespan" }
@@ -35,6 +36,10 @@ func (l *Lifespan) setup(c controller) error {
 }
 
 func (l *Lifespan) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		l.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateRunning) {
 		return nil
 	}
@@ -56,4 +61,7 @@ func (l *Lifespan) update(state component.State) error {
 	return nil
 }
 
-func (l *Lifespan) draw(*ebiten.Image, component.State) {}
+// avgCalc returns the amount of time it took for the last update.
+func (l *Lifespan) avgCalc() time.Duration {
+	return l.lastDuration
+}

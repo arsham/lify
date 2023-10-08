@@ -106,7 +106,7 @@ func (v Vec) Angle() Radian {
 	return Radian(math.Atan2(v.Y, v.X))
 }
 
-// RadToVec converts a given angle into a normalized vector that encodes that direction.
+// RadToVec converts a given angle into a normalised vector that encodes that direction.
 func RadToVec(angle Radian) Vec {
 	return Vec{X: angle.Cos(), Y: angle.Sin()}
 }

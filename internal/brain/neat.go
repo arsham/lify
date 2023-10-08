@@ -1,3 +1,4 @@
+// Package brain contains the logic for the neural network.
 package brain
 
 import (

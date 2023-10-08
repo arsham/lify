@@ -46,6 +46,10 @@ const (
 	// ToggleTextures toggles drawing of renderable textures. This has no
 	// effect on drawing bounding boxes.
 	ToggleTextures
+	// ToggleCollisions toggles detection of collisions.
+	ToggleCollisions
+	// ToggleCollisionBoxes toggles drawing of collision boxes.
+	ToggleCollisionBoxes
 	// DropFood on mouse cursor location.
 	DropFood
 )

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -17,12 +18,13 @@ import (
 
 // BoundingBox system handles drawing of entitties' bounding boxes.
 type BoundingBox struct {
-	entitties  *entity.Manager
-	components *component.Manager
-	assets     *asset.Manager
-	Colour     color.Color
-	canvas     *ebiten.Image
-	Size       float64
+	entitties    *entity.Manager
+	components   *component.Manager
+	assets       *asset.Manager
+	Colour       color.Color
+	canvas       *ebiten.Image
+	Size         float64
+	lastDuration time.Duration
 }
 
 var _ System = (*BoundingBox)(nil)
@@ -51,22 +53,26 @@ func (b *BoundingBox) setup(c controller) error {
 }
 
 func (b *BoundingBox) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		b.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StateDrawBoundingBoxes) {
 		return nil
 	}
 
 	b.canvas = ebiten.NewImage(ebiten.WindowSize())
-	collisions := b.components.Collision
+	boundingBoxes := b.components.BoundingBox
 	positions := b.components.Position
 	b.entitties.MapByMask(entity.BoxBounded, func(e *entity.Entity) {
 		id := e.ID
-		collision := collisions[id]
+		boundingBox := boundingBoxes[id]
 		position := positions[id]
 		angle := position.Angle
 		if !position.Velocity.IsZero() {
 			angle = position.Velocity.Angle() + math.Pi/2
 		}
-		rect := collision.Moved(position.Vec())
+		rect := boundingBox.Moved(position.Vec())
 		corners := []geom.Vec{{
 			X: rect.Min.X,
 			Y: rect.Min.Y,
@@ -102,4 +108,9 @@ func (b *BoundingBox) draw(screen *ebiten.Image, state component.State) {
 	op := &ebiten.DrawImageOptions{}
 	op.ColorScale.ScaleWithColor(b.Colour)
 	screen.DrawImage(b.canvas, op)
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (b *BoundingBox) avgCalc() time.Duration {
+	return b.lastDuration
 }

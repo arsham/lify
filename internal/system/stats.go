@@ -1,9 +1,11 @@
 package system
 
 import (
+	"cmp"
 	"fmt"
 	"runtime"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"time"
 
@@ -16,15 +18,23 @@ import (
 	"github.com/arsham/neuragene/internal/entity"
 )
 
+type reports interface {
+	avgCalc() time.Duration
+	String() string
+}
+
 // Stats prints useful statistics every 2 seconds.
 type Stats struct {
-	entities   *entity.Manager
-	controller controller
-	updateTime time.Time
-	dt         time.Duration
-	filterTime time.Duration
-	frameCount uint64
-	fps        uint64
+	entities     *entity.Manager
+	controller   controller
+	updateTime   time.Time
+	stats        map[string]time.Duration
+	reports      []reports
+	dt           time.Duration
+	filterTime   time.Duration
+	lastDuration time.Duration
+	frameCount   uint64
+	fps          uint64
 }
 
 var _ System = (*Stats)(nil)
@@ -42,24 +52,33 @@ func (s *Stats) setup(c controller) error {
 		return fmt.Errorf("%w: controller", ErrInvalidArgument)
 	}
 	s.updateTime = time.Now()
+	s.stats = make(map[string]time.Duration, 10)
 	return nil
 }
 
 // update prints the stats if the last time it was printed was 2 seconds ago.
 func (s *Stats) update(state component.State) error {
+	started := time.Now()
+	defer func() {
+		s.lastDuration = time.Since(started)
+	}()
 	if !all(state, component.StatePrintStats) {
 		return nil
 	}
 	s.frameCount++
 	s.fps++
+	for _, r := range s.reports {
+		s.stats[r.String()] += r.avgCalc()
+	}
 	if time.Since(s.updateTime) >= time.Second*2 {
 		s.dt = s.controller.LastFrameDuration()
 		t1 := time.Now()
 		s.entities.MapByMask(0b111111, func(*entity.Entity) {})
-		printStats(s.entities, s)
+		s.printStats()
 		s.filterTime = time.Since(t1)
 		s.updateTime = time.Now()
 		s.fps = 0
+		clear(s.stats)
 	}
 	return nil
 }
@@ -78,15 +97,14 @@ func printCurrentTime() {
 	_, _ = tm.Println(strings.Repeat("-", 47))
 }
 
-func printEngineStats(em *entity.Manager, stats *Stats) {
+func (s *Stats) printEngineStats() {
 	_, _ = tm.Println(format("Engine Statistics:", ""))
-	_, _ = tm.Println(format("Entities:", fmt.Sprintf("%d", em.Len())))
-	_, _ = tm.Println(format("FilterTime:", stats.filterTime.String()))
-	_, _ = tm.Println(format("FrameTime:", stats.dt.String()))
-	_, _ = tm.Println(format("Total Frames:", fmt.Sprintf("%d", stats.frameCount)))
-	_, _ = tm.Println(format("FPS:", fmt.Sprintf("%d", stats.fps/2)))
+	_, _ = tm.Println(format("Entities:", fmt.Sprintf("%d", s.entities.Len())))
+	_, _ = tm.Println(format("FilterTime:", s.filterTime.String()))
+	_, _ = tm.Println(format("FrameTime:", s.dt.String()))
+	_, _ = tm.Println(format("Total Frames:", fmt.Sprintf("%d", s.frameCount)))
+	_, _ = tm.Println(format("FPS:", fmt.Sprintf("%d", s.fps/2)))
 	_, _ = tm.Println(strings.Repeat("-", 47))
-	_, _ = tm.Println()
 }
 
 func printMemoryStats() {
@@ -118,16 +136,45 @@ func printRuntimeStats() {
 	_, _ = tm.Println(strings.Repeat("-", 47))
 }
 
-func printStats(em *entity.Manager, stats *Stats) {
+func (s *Stats) printStats() {
 	tm.Clear()
 	tm.MoveCursor(0, 0)
 	printCurrentTime()
 	printRuntimeStats()
 	printMemoryStats()
-	printEngineStats(em, stats)
+	s.printEngineStats()
+	s.printSystemStats()
 	tm.Flush()
 }
 
 func format(key, val string) string {
 	return fmt.Sprintf("| %-20s | %-20s |", key, val)
+}
+
+// avgCalc returns the amount of time it took for the last update.
+func (s *Stats) avgCalc() time.Duration {
+	return s.lastDuration
+}
+
+func (s *Stats) printSystemStats() {
+	var total time.Duration
+	type value struct {
+		name string
+		dur  time.Duration
+	}
+	values := make([]value, 0, len(s.stats))
+	for name, avg := range s.stats {
+		avg /= time.Duration(s.fps)
+		total += avg
+		values = append(values, value{name, avg})
+	}
+	slices.SortFunc(values, func(a, b value) int {
+		return cmp.Compare(a.name, b.name)
+	})
+	for _, t := range values {
+		_, _ = tm.Println(format(t.name, t.dur.String()))
+	}
+	_, _ = tm.Println(format("Total", total.String()))
+	_, _ = tm.Println(strings.Repeat("-", 47))
+	_, _ = tm.Println()
 }

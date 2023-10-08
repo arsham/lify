@@ -16,8 +16,8 @@ type Manager struct {
 	Sprite map[uint64]*Sprite
 	// Lifespan contains the lifespan of entities.
 	Lifespan map[uint64]*Lifespan
-	// Collision contains the bounding box of entities.
-	Collision map[uint64]*Collision
+	// BoundingBox contains the bounding box of entities.
+	BoundingBox map[uint64]*BoundingBox
 }
 
 // Position component holds the position, scale, velocity vector movement of an
@@ -85,9 +85,9 @@ type Lifespan struct {
 	Remaining int
 }
 
-// Collision specifies the bounding box in which an entity will collide with
+// BoundingBox specifies the bounding box in which an entity will collide with
 // other entities.
-type Collision struct {
+type BoundingBox struct {
 	geom.Rect
 }
 
@@ -122,4 +122,10 @@ const (
 	// StateDrawTextures indicates that the system should draw the entity's
 	// texture.
 	StateDrawTextures
+	// StateHandleCollisions indicates that the system should check for
+	// collisions.
+	StateHandleCollisions
+	// StateDrawCollisionBoxes indicates that the system should draw the
+	// collision boxes.
+	StateDrawCollisionBoxes
 )
