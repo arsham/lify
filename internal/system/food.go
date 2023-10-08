@@ -27,7 +27,6 @@ func (a *Food) setup(c controller) error {
 	a.entities = c.EntityManager()
 	a.assets = c.AssetManager()
 	a.components = c.ComponentManager()
-	fmt.Print("FRUITY")
 	if a.entities == nil {
 		return fmt.Errorf("%w: entity manager", ErrInvalidArgument)
 	}
@@ -47,15 +46,13 @@ func (a *Food) setup(c controller) error {
 
 // update will spawn food at the cursor position.
 func (a *Food) update(state component.State) error {
-	if !all(state, component.StateSpawnFood, component.StateRunning) {
+	if !all(state, component.StateRunning, component.StateSpawnFood) {
 		return nil
 	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) {
-		x, y := ebiten.CursorPosition()
-		err := a.spawnFood(float64(x), float64(y))
-		if err != nil {
-			return err
-		}
+	x, y := ebiten.CursorPosition()
+	err := a.spawnFood(float64(x), float64(y))
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -63,9 +60,6 @@ func (a *Food) update(state component.State) error {
 const foodMask = entity.Positioned | entity.BoxBounded | entity.Lifespan
 
 func (a *Food) spawnFood(x, y float64) error {
-	if !all(component.StateRunning) {
-		return nil
-	}
 	food := a.entities.NewEntity(foodMask)
 	id := food.ID
 	a.components.Position[id] = &component.Position{
