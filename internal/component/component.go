@@ -109,6 +109,8 @@ const (
 	StateLimitFPS
 	// StateSpawnAnts indicates that the system should spawn ants.
 	StateSpawnAnts
+	// StateSpawnFood indicates that the system will spawn food.
+	StateSpawnFood
 	// StatePrintStats indicates that the system should print stats.
 	StatePrintStats
 	// StateLimitLifespans indicates that the system should limit the lifespan

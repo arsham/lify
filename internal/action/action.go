@@ -50,6 +50,8 @@ const (
 	ToggleCollisions
 	// ToggleCollisionBoxes toggles drawing of collision boxes.
 	ToggleCollisionBoxes
+	// DropFood on mouse cursor location.
+	DropFood
 )
 
 // An Action is an input state that would result in an activity in a scene.

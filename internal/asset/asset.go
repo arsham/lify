@@ -3,6 +3,7 @@ package asset
 
 import (
 	"fmt"
+	"image"
 	_ "image/png" // This is needed for decoding png files.
 	"io/fs"
 	"path/filepath"
@@ -19,6 +20,7 @@ type Name int
 // These are asset names.
 const (
 	Ant Name = iota + 1
+	FruitApple
 )
 
 // Manager holds the assets for rendering.
@@ -41,7 +43,29 @@ func New(filesystem fs.FS) (*Manager, error) {
 	}
 	a.sprites[Ant] = antPic
 
+	fruitSheet, _, err := ebitenutil.NewImageFromFileSystem(a.fs, filepath.Join("assets", "images", "food", "fruits.png"))
+	if err != nil {
+		return nil, fmt.Errorf("loading asset: %w", err)
+	}
+
+	fruits := splitSpriteSheetImages(fruitSheet, 1, 16, 16)
+
+	a.sprites[FruitApple] = fruits[0]
+
 	return a, nil
+}
+
+// LoadSpritesheet returns n sub images from the given input image.
+func splitSpriteSheetImages(spritesheet *ebiten.Image, n, width, height int) []*ebiten.Image {
+	sprites := []*ebiten.Image{}
+
+	for i := 0; i < n; i++ {
+		dimensions := image.Rect(i*width, 0, (i+1)*width, height)
+		sprite := ebiten.NewImageFromImage(spritesheet.SubImage(dimensions))
+		sprites = append(sprites, sprite)
+	}
+
+	return sprites
 }
 
 // Sprites returns the map of sprites.

@@ -17,6 +17,9 @@ import (
 // ErrInvalidArgument indicates that the given argument is invalid or missing.
 var ErrInvalidArgument = errors.New("invalid or missing argument")
 
+// ErrNotFound inidcates that the resource was not found.
+var ErrNotFound = errors.New("resource not found")
+
 // controller is a controller for a system for querying dependencies.
 type controller interface {
 	// EntityManager returns the entity manager.
