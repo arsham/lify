@@ -22,37 +22,37 @@ type Food struct {
 
 var _ System = (*Food)(nil)
 
-func (a *Food) String() string { return "Food" }
+func (f *Food) String() string { return "Food" }
 
 // setup returns an error if the entity manager or the asset manager is nil.
-func (a *Food) setup(c controller) error {
-	a.entities = c.EntityManager()
-	a.assets = c.AssetManager()
-	a.components = c.ComponentManager()
-	if a.entities == nil {
+func (f *Food) setup(c controller) error {
+	f.entities = c.EntityManager()
+	f.assets = c.AssetManager()
+	f.components = c.ComponentManager()
+	if f.entities == nil {
 		return fmt.Errorf("%w: entity manager", ErrInvalidArgument)
 	}
-	if a.assets == nil {
+	if f.assets == nil {
 		return fmt.Errorf("%w: asset manager", ErrInvalidArgument)
 	}
-	if a.components == nil {
+	if f.components == nil {
 		return fmt.Errorf("%w: component manager", ErrInvalidArgument)
 	}
-	sprite := a.assets.Sprites()[asset.FruitApple]
+	sprite := f.assets.Sprites()[asset.FruitApple]
 	if sprite == nil {
 		return fmt.Errorf("%w: sprites", ErrNotFound)
 	}
-	a.sprite = sprite
+	f.sprite = sprite
 	return nil
 }
 
 // update will spawn food at the cursor position.
-func (a *Food) update(state component.State) error {
+func (f *Food) update(state component.State) error {
 	if !all(state, component.StateRunning, component.StateSpawnFood) {
 		return nil
 	}
 	x, y := ebiten.CursorPosition()
-	err := a.spawnFood(float64(x), float64(y))
+	err := f.spawnFood(float64(x), float64(y))
 	if err != nil {
 		return err
 	}
@@ -61,27 +61,27 @@ func (a *Food) update(state component.State) error {
 
 const foodMask = entity.Positioned | entity.BoxBounded | entity.Lifespan
 
-func (a *Food) spawnFood(x, y float64) error {
-	food := a.entities.NewEntity(foodMask)
+func (f *Food) spawnFood(x, y float64) error {
+	food := f.entities.NewEntity(foodMask)
 	id := food.ID
-	a.components.Position[id] = &component.Position{
+	f.components.Position[id] = &component.Position{
 		Scale:    1,
 		Pos:      geom.P(x, y),
 		Velocity: geom.Vec{X: 1, Y: 1},
 		Angle:    0,
 	}
-	a.components.Sprite[id] = &component.Sprite{
+	f.components.Sprite[id] = &component.Sprite{
 		Name: asset.FruitApple,
 	}
-	a.components.Lifespan[id] = &component.Lifespan{
+	f.components.Lifespan[id] = &component.Lifespan{
 		Total:     500,
 		Remaining: 500,
 	}
 
-	b := a.sprite.Bounds()
+	b := f.sprite.Bounds()
 	bounds := geom.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
 
-	a.components.Collision[id] = &component.Collision{Rect: bounds}
+	f.components.Collision[id] = &component.Collision{Rect: bounds}
 	return nil
 }
 
