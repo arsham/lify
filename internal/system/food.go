@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/arsham/neuragene/internal/asset"
 	"github.com/arsham/neuragene/internal/component"
@@ -12,10 +13,7 @@ import (
 
 // Food system handles the reward that entities get from interaction with food.
 type Food struct {
-	entities   *entity.Manager
-	components *component.Manager
-	assets     *asset.Manager
-	sprite     *ebiten.Image
+	lastDuration time.Duration
 }
 
 var _ System = (*Food)(nil)
@@ -83,4 +81,8 @@ func (a *Food) spawnFood(x, y float64) error {
 	return nil
 }
 
-func (*Food) draw(*ebiten.Image, component.State) {}
+
+// avgCalc returns the amount of time it took for the last update.
+func (f *Food) avgCalc() time.Duration {
+	return f.lastDuration
+}
