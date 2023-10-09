@@ -81,7 +81,7 @@ func (f *Food) spawnFood(x, y float64) error {
 	b := f.sprite.Bounds()
 	bounds := geom.R(float64(b.Min.X), float64(b.Min.Y), float64(b.Max.X), float64(b.Max.Y))
 
-	f.components.Collision[id] = &component.Collision{Rect: bounds}
+	f.components.BoundingBox[id] = &component.BoundingBox{Rect: bounds}
 	return nil
 }
 
