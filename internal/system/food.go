@@ -81,6 +81,7 @@ func (a *Food) spawnFood(x, y float64) error {
 	return nil
 }
 
+func (f *Food) draw(*ebiten.Image, component.State) {}
 
 // avgCalc returns the amount of time it took for the last update.
 func (f *Food) avgCalc() time.Duration {
