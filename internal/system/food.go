@@ -13,6 +13,10 @@ import (
 
 // Food system handles the reward that entities get from interaction with food.
 type Food struct {
+	entities     *entity.Manager
+	components   *component.Manager
+	assets       *asset.Manager
+	sprite       *ebiten.Image
 	lastDuration time.Duration
 }
 
